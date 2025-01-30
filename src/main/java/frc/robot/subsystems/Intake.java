@@ -25,22 +25,23 @@ import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
   /** Creates a new Intake. */
-static TalonFX intakeTop = new TalonFX(Constants.IntakeConstants.TopIntakeCAN_ID); 
-static DigitalInput BBIntake = new DigitalInput(Constants.IntakeConstants.BeamBreakPinIntake);
-static DigitalInput BBDis = new DigitalInput(Constants.IntakeConstants.BeamBreakPinDis);
-static DoubleSolenoid intakeSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 4, 5);
+  static TalonFX intakeTop = new TalonFX(Constants.IntakeConstants.TopIntakeCAN_ID);
+  static DigitalInput BBIntake = new DigitalInput(Constants.IntakeConstants.BeamBreakPinIntake);
+  static DigitalInput BBDis = new DigitalInput(Constants.IntakeConstants.BeamBreakPinDis);
+  static DoubleSolenoid intakeSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 4, 5);
 
-private ShuffleboardTab DS_IntakeTab= Shuffleboard.getTab("Intake");
-private GenericEntry DS_intakeBeamBreak= DS_IntakeTab.add("BB Forward", true).getEntry();
-private GenericEntry DS_disBeamBrake= DS_IntakeTab.add("BB Back", true).getEntry();
+  private ShuffleboardTab DS_IntakeTab = Shuffleboard.getTab("Intake");
+  private GenericEntry DS_intakeBeamBreak = DS_IntakeTab.add("BB Forward", true).getEntry();
+  private GenericEntry DS_disBeamBrake = DS_IntakeTab.add("BB Back", true).getEntry();
 
-//private DigitalInput beamBreak= new DigitalInput(Constants.IntakeConstants.BeamBreakPin);
+  // private DigitalInput beamBreak= new
+  // DigitalInput(Constants.IntakeConstants.BeamBreakPin);
 
- 
+  // edit
 
   public Intake() {
     var intakeTopConfig = intakeTop.getConfigurator();
-    
+
     var limitConfigs = new CurrentLimitsConfigs();
     limitConfigs.StatorCurrentLimit = 60;
     limitConfigs.StatorCurrentLimitEnable = true;
@@ -50,109 +51,80 @@ private GenericEntry DS_disBeamBrake= DS_IntakeTab.add("BB Back", true).getEntry
 
   }
 
-  
-
-  public static void setIntakePower(TalonFX motor, double power)
-  {
-  motor.set(power);
+  public static void setIntakePower(TalonFX motor, double power) {
+    motor.set(power);
   }
 
+  public static void setIntake(double power) {
 
-  public static void setIntake(double power) 
-  {
- 
-  setIntakePower(intakeTop, -power);
+    setIntakePower(intakeTop, -power);
   }
 
-  private double intakeTestCode(double power){
-    double output=0;
-    if(!this.disBBValue()||!this.intakeBBValue()){
-        if(!this.disBBValue()){
-          output = 0;
-        }
-        else{
-          output = 0.05;
-        }
+  private double intakeTestCode(double power) {
+    double output = 0;
+    if (!this.disBBValue() || !this.intakeBBValue()) {
+      if (!this.disBBValue()) {
+        output = 0;
+      } else {
+        output = 0.05;
+      }
+    } else {
+      output = power;
     }
-else{
-  output = power;
-}
     return output;
   }
-  
-  public static void stopIntake() 
-  {
-  
-  setIntakePower(intakeTop, 0);
+
+  public static void stopIntake() {
+
+    setIntakePower(intakeTop, 0);
   }
 
-  public boolean intakeBBValue(){
+  public boolean intakeBBValue() {
     return BBIntake.get();
   }
 
-  public boolean disBBValue(){
+  public boolean disBBValue() {
     return BBDis.get();
   }
 
+  public void manualIntake(BooleanSupplier InSupplier, BooleanSupplier OutSupplier) {
+    if (OutSupplier.getAsBoolean() || InSupplier.getAsBoolean()) { // Intake Code
+      if (OutSupplier.getAsBoolean()) {
+        setIntake(intakeTestCode(1));
+      } else {
 
-  public void manualIntake(BooleanSupplier InSupplier, BooleanSupplier OutSupplier ){
-    if(OutSupplier.getAsBoolean()||InSupplier.getAsBoolean()){    //Intake Code
-      if(OutSupplier.getAsBoolean()){
-       setIntake(intakeTestCode(1));
-        } 
-     else{
-      
-        setIntake(1); }
-        
-      }   
-      else{
-        setIntake(0);
+        setIntake(1);
       }
 
-
-
+    } else {
+      setIntake(0);
+    }
 
   }
 
-  
-  
-  public Command IntakeCoral(BooleanSupplier InSupplier, BooleanSupplier OutSupplier )
-  {
-
+  public Command IntakeCoral(BooleanSupplier InSupplier, BooleanSupplier OutSupplier) {
 
     return new FunctionalCommand(
-      ()-> {}, 
-      
-      ()-> this.manualIntake(InSupplier, OutSupplier), 
-      interrupted -> stopIntake()
-      ,
-      
-      ()-> {return false;}, 
-      
-      this
-      
-    ); 
+        () -> {
+        },
 
-   
-    
-  } 
+        () -> this.manualIntake(InSupplier, OutSupplier),
+        interrupted -> stopIntake(),
 
+        () -> {
+          return false;
+        },
 
+        this
 
-  public Command IntakeSolenoid(BooleanSupplier IntakeSupplier)
-  {
-      
-    return this.runOnce(() ->intakeSolenoid.toggle());    
-  } 
+    );
 
-    
+  }
 
-  
+  public Command IntakeSolenoid(BooleanSupplier IntakeSupplier) {
 
-
-  
-
-
+    return this.runOnce(() -> intakeSolenoid.toggle());
+  }
 
   @Override
   public void periodic() {
@@ -162,5 +134,3 @@ else{
     this.DS_disBeamBrake.setBoolean(disBBValue());
   }
 }
-
-
