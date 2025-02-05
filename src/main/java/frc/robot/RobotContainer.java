@@ -12,10 +12,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import java.util.function.BooleanSupplier;
-
-import javax.sound.midi.Sequence;
-
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -24,12 +20,10 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -43,209 +37,226 @@ import frc.robot.subsystems.EndEffector;
 
 public class RobotContainer {
 
-    // Define maximum speed and angular rate based on tuner constants, converted
-    // into appropriate units
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second
-                                                                                      // max angular velocity
+        // Define maximum speed and angular rate based on tuner constants, converted
+        // into appropriate units
+        private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+                                                                                      // speed
+        private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
+                                                                                          // second
+                                                                                          // max angular velocity
 
-    /* Setting up bindings for necessary control of the swerve drive platform */
-    // Create swerve drive requests for field-centric and robot-centric driving
-    // modes with deadband
-    private final SwerveRequest.FieldCentric fieldCentricDrive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
-    private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+        /* Setting up bindings for necessary control of the swerve drive platform */
+        // Create swerve drive requests for field-centric and robot-centric driving
+        // modes with deadband
+        private final SwerveRequest.FieldCentric fieldCentricDrive = new SwerveRequest.FieldCentric()
+                        .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+                        .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
+                                                                                 // motors
+        private final SwerveRequest.RobotCentric robotCentricDrive = new SwerveRequest.RobotCentric()
+                        .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+                        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
-    // Set up brake and wheel pointing functionalities for swerve drive
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+        // Set up brake and wheel pointing functionalities for swerve drive
+        private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+        private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
-    /* Path follower for autonomous control */
-    private final SendableChooser<Command> autoChooser;
+        /* Path follower for autonomous control */
+        // private final SendableChooser<Command> autoChooser;
 
-    // Create a telemetry logger for monitoring robot stats
-    private final Telemetry logger = new Telemetry(MaxSpeed);
+        // Create a telemetry logger for monitoring robot stats
+        // private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    // Joysticks for controlling the robot, one for driving and one for the button
-    // board
-    private final CommandJoystick joystick = new CommandJoystick(0); // My joystick
-    private final CommandJoystick buttonbord = new CommandJoystick(1); // Buttonboard joystick
-    private final Wrist wrist = new Wrist(); // Wrist subsystem for arm control
-    private final Elevator elevator = new Elevator(); // Elevator subsystem for vertical movements
-    private final EndEffector endEffector = new EndEffector(); // Intake subsystem for grabbing objects
-    private final Climber climber = new Climber(); // Intake subsystem for grabbing objects
+        // Joysticks for controlling the robot, one for driving and one for the button
+        // board
+        private final CommandJoystick joystick = new CommandJoystick(0); // My joystick
+        private final CommandJoystick buttonbord = new CommandJoystick(1); // Buttonboard joystick
+        private final Wrist wrist = new Wrist(); // Wrist subsystem for arm control
+        private final Elevator elevator = new Elevator(); // Elevator subsystem for vertical movements
+        private final EndEffector endEffector = new EndEffector(); // Intake subsystem for grabbing objects
+        private final Climber climber = new Climber(); // Intake subsystem for grabbing objects
 
-    // Instantiate the swerve drivetrain subsystem
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    // Define triggers for controlling wrist and elevator limits
-    private final Trigger wristLimiter = wrist.wristLimiter();
-    private final Trigger wristIntake = wrist.wristIntake();
-    private final Trigger elevatorIntake = elevator.elevatorIntake();
-    private final Trigger isEnabled = new Trigger(() -> DriverStation.isEnabled());
+        // Instantiate the swerve drivetrain subsystem
+        public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+        // Define triggers for controlling wrist and elevator limits
+        private final Trigger wristLimiter = wrist.wristLimiter();
+        private final Trigger wristIntake = wrist.wristIntake();
+        private final Trigger elevatorIntake = elevator.elevatorIntake();
+        private final Trigger isEnabled = new Trigger(() -> DriverStation.isEnabled());
 
-    /* Some triggers related to elevator throttles (to be developed in Sprint 4) */
-    /*
-     * private final Trigger driveThrottleL2 = elevator.driveThrottleL2(); TODO
-     * Sprint 4 beta
-     * private final Trigger driveThrottleL3 = elevator.driveThrottleL3();
-     * private final Trigger driveThrottleL4 = elevator.driveThrottleL4();
-     * 
-     * 
-     * 
-     * /*
-     * 
-     * Class Constructor
-     * 
-     */
-    public RobotContainer() {
-        // Set up autonomous command chooser using PathPlanner
-        autoChooser = AutoBuilder.buildAutoChooser();
-        SmartDashboard.putData("Auto Mode", autoChooser); // Display auto mode selector on the dashboard
-
-        // Define and register commands for the intake subsystem with different
-        // behaviors
+        /* Some triggers related to elevator throttles (to be developed in Sprint 4) */
         /*
-         * NamedCommands.registerCommand("IntakeCoral", intake.IntakeCoral(() -> true,
-         * () -> false).withTimeout(3));
-         * NamedCommands.registerCommand("StopIntake", intake.IntakeCoral(() -> false,
-         * () -> false).withTimeout(0.1));
-         * NamedCommands.registerCommand("SpitCoral", intake.IntakeCoral(() -> false, ()
-         * -> true).withTimeout(3));
+         * private final Trigger driveThrottleL2 = elevator.driveThrottleL2(); TODO
+         * Sprint 4 beta
+         * private final Trigger driveThrottleL3 = elevator.driveThrottleL3();
+         * private final Trigger driveThrottleL4 = elevator.driveThrottleL4();
+         * 
+         * 
+         * 
+         * /*
+         * 
+         * Class Constructor
+         * 
          */
+        public RobotContainer() {
+                // Set up autonomous command chooser using PathPlanner
+                // autoChooser = AutoBuilder.buildAutoChooser();
+                // SmartDashboard.putData("Auto Mode", autoChooser); // Display auto mode
+                // selector on the dashboard
 
-        configureBindings(); // Configure control bindings for robot functions
-    }
+                // Define and register commands for the intake subsystem with different
+                // behaviors
+                /*
+                 * NamedCommands.registerCommand("IntakeCoral", intake.IntakeCoral(() -> true,
+                 * () -> false).withTimeout(3));
+                 * NamedCommands.registerCommand("StopIntake", intake.IntakeCoral(() -> false,
+                 * () -> false).withTimeout(0.1));
+                 * NamedCommands.registerCommand("SpitCoral", intake.IntakeCoral(() -> false, ()
+                 * -> true).withTimeout(3));
+                 */
 
-    // Configure the control bindings for the robot's subsystems and commands
-    private void configureBindings() {
-        // Drivetrain control for swerve drive based on joystick input
-        drivetrain.setDefaultCommand(
-                // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(() -> fieldCentricDrive
-                        .withVelocityX(-joystick.getRawAxis(1) * MaxSpeed * ((1 - (0.8 * Math.pow(joystick.getRawAxis(
-                                3),
-                                0.5))))) // Drive
-                                         // forward
-                                         // with
-                                         // negative
-                                         // Y
-                                         // (forward)
-                        .withVelocityY(-joystick.getRawAxis(0) * MaxSpeed * ((1 - (0.8 * Math.pow(joystick.getRawAxis(
-                                3),
-                                0.5))))) // Drive
-                                         // left with
-                                         // negative
-                                         // X (left)
-                        .withRotationalRate(-joystick.getRawAxis(4) * MaxAngularRate * ((1
-                                - (0.8 * Math.pow(joystick.getRawAxis(
-                                        3), 0.5))))) // Drive
-                                                     // counterclockwise
-                                                     // with
-                                                     // negative
-                                                     // X
-                                                     // (left)
-                ));
+                configureBindings(); // Configure control bindings for robot functions
+        }
 
-        // Button bindings for switching to robot-centric control mode
-        joystick.button(8).toggleOnTrue(drivetrain.applyRequest(() -> robotCentricDrive
-                .withVelocityX(-joystick.getRawAxis(1) * MaxSpeed * ((1 - (0.8 * Math.pow(joystick.getRawAxis(
-                        3), 0.5))))) // Drive forward
-                                     // with negative Y
-                                     // (forward)
-                .withVelocityY(-joystick.getRawAxis(0) * MaxSpeed * ((1 - (0.8 * Math.pow(joystick.getRawAxis(
-                        3),
-                        0.5))))) // Drive left with
-                                 // negative X
-                                 // (left)
-                .withRotationalRate(-joystick.getRawAxis(4) * MaxAngularRate * ((1
-                        - (0.8 * Math.pow(joystick.getRawAxis(
-                                3), 0.5)))))) // Drive
-                                              // counterclockwise
-                                              // with
-                                              // negative
-                                              // X
-                                              // (left)
-        );
+        // Configure the control bindings for the robot's subsystems and commands
+        private void configureBindings() {
+                // Drivetrain control for swerve drive based on joystick input
+                drivetrain.setDefaultCommand(
+                                // Drivetrain will execute this command periodically
+                                drivetrain.applyRequest(() -> fieldCentricDrive
+                                                .withVelocityX(-joystick.getRawAxis(1) * MaxSpeed
+                                                                * ((1 - (0.8 * Math.pow(joystick.getRawAxis(
+                                                                                3),
+                                                                                0.5))))) // Drive
+                                                                                         // forward
+                                                                                         // with
+                                                                                         // negative
+                                                                                         // Y
+                                                                                         // (forward)
+                                                .withVelocityY(-joystick.getRawAxis(0) * MaxSpeed
+                                                                * ((1 - (0.8 * Math.pow(joystick.getRawAxis(
+                                                                                3),
+                                                                                0.5))))) // Drive
+                                                                                         // left with
+                                                                                         // negative
+                                                                                         // X (left)
+                                                .withRotationalRate(-joystick.getRawAxis(4) * MaxAngularRate * ((1
+                                                                - (0.8 * Math.pow(joystick.getRawAxis(
+                                                                                3), 0.5))))) // Drive
+                                                                                             // counterclockwise
+                                                                                             // with
+                                                                                             // negative
+                                                                                             // X
+                                                                                             // (left)
+                                ));
 
-        // Joystick button to reset field-centric heading
-        joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+                // Button bindings for switching to robot-centric control mode
+                joystick.button(8).toggleOnTrue(drivetrain.applyRequest(() -> robotCentricDrive
+                                .withVelocityX(-joystick.getRawAxis(1) * MaxSpeed
+                                                * ((1 - (0.8 * Math.pow(joystick.getRawAxis(
+                                                                3), 0.5))))) // Drive forward
+                                                                             // with negative Y
+                                                                             // (forward)
+                                .withVelocityY(-joystick.getRawAxis(0) * MaxSpeed
+                                                * ((1 - (0.8 * Math.pow(joystick.getRawAxis(
+                                                                3),
+                                                                0.5))))) // Drive left with
+                                                                         // negative X
+                                                                         // (left)
+                                .withRotationalRate(-joystick.getRawAxis(4) * MaxAngularRate * ((1
+                                                - (0.8 * Math.pow(joystick.getRawAxis(
+                                                                3), 0.5)))))) // Drive
+                                                                              // counterclockwise
+                                                                              // with
+                                                                              // negative
+                                                                              // X
+                                                                              // (left)
+                );
 
-        // Joystick button to apply the brake to stop all swerve drive modules
-        joystick.button(6).whileTrue(drivetrain.applyRequest(() -> brake));
+                // Joystick button to reset field-centric heading
+                joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        // Button to point the wheels in a specific direction based on joystick input
-        joystick.button(3).whileTrue(drivetrain.applyRequest(
-                () -> point.withModuleDirection(new Rotation2d(-joystick.getRawAxis(1), -joystick.getRawAxis(0)))));
+                // Joystick button to apply the brake to stop all swerve drive modules
+                joystick.button(6).whileTrue(drivetrain.applyRequest(() -> brake));
 
-        // Run SysId routines when specific button combinations are pressed
-        joystick.button(7).and(joystick.button(4)).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.button(7).and(joystick.button(1)).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.button(8).and(joystick.button(4)).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.button(8).and(joystick.button(1)).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+                // Button to point the wheels in a specific direction based on joystick input
+                joystick.button(3).whileTrue(drivetrain.applyRequest(
+                                () -> point.withModuleDirection(
+                                                new Rotation2d(-joystick.getRawAxis(1), -joystick.getRawAxis(0)))));
 
-        // Reset the field-centric heading on button B
-        joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+                // Run SysId routines when specific button combinations are pressed
+                joystick.button(7).and(joystick.button(4)).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+                joystick.button(7).and(joystick.button(1)).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+                joystick.button(8).and(joystick.button(4)).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+                joystick.button(8).and(joystick.button(1)).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        // Register telemetry logging for the drivetrain subsystem
-        drivetrain.registerTelemetry(logger::telemeterize);
+                // Reset the field-centric heading on button B
+                joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        // Intake command bindings, such as when to turn on intake or control trays
-        ((elevator.elevatorIntake().and(wrist.wristIntake()))).whileTrue(endEffector.IntakeCoral());
-        buttonbord.button(5).whileTrue(endEffector.IntakeCoral());
-        buttonbord.button(2).whileTrue(endEffector.manualIntake());
-        buttonbord.button(3).whileTrue(endEffector.manualBackFeed());
-        endEffector.setDefaultCommand(endEffector.nothing());
+                // Register telemetry logging for the drivetrain subsystem
+                // drivetrain.registerTelemetry(logger::telemeterize);
 
-        // Commands for wrist and elevator control using buttonboard inputs
-        wrist.setDefaultCommand(wrist.WristPIDCommandDefault());
-        buttonbord.axisGreaterThan(0, 0.1).or(buttonbord.axisLessThan(0, -0.1))
-                .whileTrue(wrist.ManualWrist(() -> buttonbord.getRawAxis(0)));
+                // Intake command bindings, such as when to turn on intake or control trays
+                endEffector.setDefaultCommand(endEffector.nothing());
+                ((elevator.elevatorIntake().and(wrist.wristIntake()))).whileTrue(endEffector.IntakeCoral());
+                buttonbord.button(5).whileTrue(endEffector.IntakeCoral());
+                buttonbord.button(2).whileTrue(endEffector.manualIntake());
+                buttonbord.button(3).whileTrue(endEffector.manualBackFeed());
 
-        // Elevator control with wrist limit consideration
-        elevator.setDefaultCommand((elevator.elevatorPIDCommandDefault(() -> wristLimiter.getAsBoolean())));
-        (wristLimiter).and((buttonbord.axisGreaterThan(1, 0.1).or(buttonbord.axisLessThan(1, -0.1)))
-                .whileTrue(elevator.ManualElevator(() -> buttonbord.getRawAxis(1), () -> wristLimiter.getAsBoolean())));
+                // Commands for wrist and elevator control using buttonboard inputs
+                wrist.setDefaultCommand(wrist.WristPIDCommandDefault());
+                buttonbord.axisGreaterThan(0, 0.1).or(buttonbord.axisLessThan(0, -0.1))
+                                .whileTrue(wrist.ManualWrist(() -> buttonbord.getRawAxis(0)));
 
-        // Wrist and elevator commands for specific positions, triggered by button
-        // presses
-        buttonbord.button(1)
-                .onTrue(Commands.sequence(wrist.WristSafety(), elevator.ElevatorL4(wristLimiter), wrist.WristL4()));
-        buttonbord.button(4)
-                .onTrue(Commands.sequence(wrist.WristSafety(), elevator.ElevatorL3(wristLimiter), wrist.WristL3()));
-        buttonbord.button(7)
-                .onTrue(Commands.sequence(wrist.WristSafety(), elevator.ElevatorL2(wristLimiter), wrist.WristL2()));
-        buttonbord.button(10)
-                .onTrue(Commands.sequence(wrist.WristSafety(), elevator.ElevatorL1(wristLimiter), wrist.WristL1()));
-        buttonbord.button(12)
-                .onTrue(Commands.parallel(wrist.ExitState(), elevator.ExitState(wristLimiter)));
+                // Elevator control with wrist limit consideration
+                elevator.setDefaultCommand((elevator.elevatorPIDCommandDefault(() -> wristLimiter.getAsBoolean())));
+                (wristLimiter).and((buttonbord.axisGreaterThan(1, 0.1).or(buttonbord.axisLessThan(1, -0.1)))
+                                .whileTrue(elevator.ManualElevator(() -> buttonbord.getRawAxis(1),
+                                                () -> wristLimiter.getAsBoolean())));
+                // Commands to preserve position when enabled
+                this.isEnabled.onTrue(elevator.startCommand(wristLimiter));
+                this.isEnabled.onTrue(wrist.startWristCommand());
 
-        // Buttonboard button 8 toggles manual tray control for the intake
-        buttonbord.button(8)
-                .toggleOnTrue(climber.TrayManual());
+                // Wrist and elevator commands for specific positions, triggered by button
+                // presses
+                buttonbord.button(1)
+                                .onTrue(Commands.sequence(wrist.WristSafety(), elevator.ElevatorL4(wristLimiter),
+                                                wrist.WristL4()));
+                buttonbord.button(4)
+                                .onTrue(Commands.sequence(wrist.WristSafety(), elevator.ElevatorL3(wristLimiter),
+                                                wrist.WristL3()));
+                buttonbord.button(7)
+                                .onTrue(Commands.sequence(wrist.WristSafety(), elevator.ElevatorL2(wristLimiter),
+                                                wrist.WristL2()));
+                buttonbord.button(10)
+                                .onTrue(Commands.sequence(wrist.WristSafety(), elevator.ElevatorL1(wristLimiter),
+                                                wrist.WristL1()));
+                buttonbord.button(12)
+                                .onTrue(Commands.parallel(wrist.ExitState(), elevator.ExitState(wristLimiter)));
 
-        // Additional button press mappings for elevator and wrist control
-        /*
-         * buttonbord.button(1).onTrue(elevator.L4Elevator(wristLimiter));
-         * buttonbord.button(4).onTrue(elevator.L3Elevator(wristLimiter));
-         * buttonbord.button(7).onTrue(elevator.L2Elevator(wristLimiter));
-         * buttonbord.button(10).onTrue(elevator.Home(wristLimiter));
-         */
+                // Buttonboard button 8 toggles manual tray control for the intake
+                buttonbord.button(8)
+                                .toggleOnTrue(climber.TrayManual());
 
-        /*
-         * buttonbord.button(3).onTrue(wrist.L4Wrist());
-         * buttonbord.button(6).onTrue(wrist.L3Wrist());
-         * buttonbord.button(9).onTrue(wrist.L2Wrist());
-         * buttonbord.button(11).onTrue(wrist.L1Wrist());
-         * buttonbord.button(12).onTrue(wrist.Home());
-         */
-    }
+                // Additional button press mappings for elevator and wrist control
+                /*
+                 * buttonbord.button(1).onTrue(elevator.L4Elevator(wristLimiter));
+                 * buttonbord.button(4).onTrue(elevator.L3Elevator(wristLimiter));
+                 * buttonbord.button(7).onTrue(elevator.L2Elevator(wristLimiter));
+                 * buttonbord.button(10).onTrue(elevator.Home(wristLimiter));
+                 */
 
-    // Autonomous command that is selected based on the chosen auto mode
-    public Command getAutonomousCommand() {
-        /* Run the path selected from the auto chooser */
-        return autoChooser.getSelected();
-    }
+                /*
+                 * buttonbord.button(3).onTrue(wrist.L4Wrist());
+                 * buttonbord.button(6).onTrue(wrist.L3Wrist());
+                 * buttonbord.button(9).onTrue(wrist.L2Wrist());
+                 * buttonbord.button(11).onTrue(wrist.L1Wrist());
+                 * buttonbord.button(12).onTrue(wrist.Home());
+                 */
+        }
+
+        // Autonomous command that is selected based on the chosen auto mode
+        public Command getAutonomousCommand() {
+                /* Run the path selected from the auto chooser */
+                return null; // autoChooser.getSelected();
+        }
 }

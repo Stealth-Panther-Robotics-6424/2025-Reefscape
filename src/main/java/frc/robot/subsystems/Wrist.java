@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -208,18 +209,9 @@ public class Wrist extends SubsystemBase {
   // Command to start the wrist motor but with no action (used for state
   // transitions)
   public Command startWristCommand() {
-    return new FunctionalCommand(
-        () -> {
-        }, // Initialize: No action needed
-        () -> {
-        }, // Execute: No action, the wrist motor stays in its current state
-        interrupted -> this.setWristPID(this.getWristPosition()), // Interrupted: Reset to current wrist position if
-                                                                  // interrupted
-        () -> {
-          return false; // Finish condition: Always false, meaning the command never finishes
-                        // automatically
-        },
-        this); // Subsystem: This command is bound to the Wrist subsystem
+    return this.runOnce(() -> {
+      this.setWristPID(this.getWristPosition());
+    });
   }
 
   // Command to ensure the wrist is moved to a safe position
