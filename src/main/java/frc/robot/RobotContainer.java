@@ -12,6 +12,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.lang.reflect.Method;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -35,6 +37,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Wrist;
 import frc.robot.subsystems.EndEffector;
 
+@SuppressWarnings("unused")
 public class RobotContainer {
 
         // Define maximum speed and angular rate based on tuner constants, converted
@@ -79,9 +82,11 @@ public class RobotContainer {
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
         // Define triggers for controlling wrist and elevator limits
         private final Trigger wristLimiter = wrist.wristLimiter();
+        private final Trigger canFold = elevator.canFold();
         private final Trigger wristIntake = wrist.wristIntake();
         private final Trigger elevatorIntake = elevator.elevatorIntake();
         private final Trigger isEnabled = new Trigger(() -> DriverStation.isEnabled());
+        private final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
 
         /* Some triggers related to elevator throttles (to be developed in Sprint 4) */
         /*
@@ -123,53 +128,44 @@ public class RobotContainer {
                 drivetrain.setDefaultCommand(
                                 // Drivetrain will execute this command periodically
                                 drivetrain.applyRequest(() -> fieldCentricDrive
-                                                .withVelocityX(-joystick.getRawAxis(1) * MaxSpeed
-                                                                * ((1 - (0.8 * Math.pow(joystick.getRawAxis(
-                                                                                3),
-                                                                                0.5))))) // Drive
-                                                                                         // forward
-                                                                                         // with
-                                                                                         // negative
-                                                                                         // Y
-                                                                                         // (forward)
-                                                .withVelocityY(-joystick.getRawAxis(0) * MaxSpeed
-                                                                * ((1 - (0.8 * Math.pow(joystick.getRawAxis(
-                                                                                3),
-                                                                                0.5))))) // Drive
-                                                                                         // left with
-                                                                                         // negative
-                                                                                         // X (left)
-                                                .withRotationalRate(-joystick.getRawAxis(4) * MaxAngularRate * ((1
-                                                                - (0.8 * Math.pow(joystick.getRawAxis(
-                                                                                3), 0.5))))) // Drive
-                                                                                             // counterclockwise
-                                                                                             // with
-                                                                                             // negative
-                                                                                             // X
-                                                                                             // (left)
+                                                .withVelocityX(-joystick.getRawAxis(1) * MaxSpeed * throttle(3)
+                                                                * elevator.elevatorThrottle()) // Drive
+                                                                                               // forward
+                                                                                               // with
+                                                                                               // negative
+                                                                                               // Y
+                                                                                               // (forward)
+                                                .withVelocityY(-joystick.getRawAxis(0) * MaxSpeed * throttle(3)
+                                                                * elevator.elevatorThrottle()) // Drive
+                                                                                               // left
+                                                                                               // with
+                                                                                               // negative
+                                                                                               // X
+                                                                                               // (left)
+                                                .withRotationalRate(
+                                                                -joystick.getRawAxis(4) * MaxAngularRate * throttle(3)
+                                                                                * elevator.elevatorThrottle()) // Drive
+                                                                                                               // counterclockwise
+                                                                                                               // with
+                                                                                                               // negative
+                                                                                                               // X
+                                                                                                               // (left)
                                 ));
 
                 // Button bindings for switching to robot-centric control mode
                 joystick.button(8).toggleOnTrue(drivetrain.applyRequest(() -> robotCentricDrive
-                                .withVelocityX(-joystick.getRawAxis(1) * MaxSpeed
-                                                * ((1 - (0.8 * Math.pow(joystick.getRawAxis(
-                                                                3), 0.5))))) // Drive forward
-                                                                             // with negative Y
-                                                                             // (forward)
-                                .withVelocityY(-joystick.getRawAxis(0) * MaxSpeed
-                                                * ((1 - (0.8 * Math.pow(joystick.getRawAxis(
-                                                                3),
-                                                                0.5))))) // Drive left with
-                                                                         // negative X
-                                                                         // (left)
-                                .withRotationalRate(-joystick.getRawAxis(4) * MaxAngularRate * ((1
-                                                - (0.8 * Math.pow(joystick.getRawAxis(
-                                                                3), 0.5)))))) // Drive
-                                                                              // counterclockwise
-                                                                              // with
-                                                                              // negative
-                                                                              // X
-                                                                              // (left)
+                                .withVelocityX(-joystick.getRawAxis(1) * MaxSpeed * throttle(3)
+                                                * elevator.elevatorThrottle()) // Drive forward with
+                                // negative Y (forward)
+                                .withVelocityY(-joystick.getRawAxis(0) * MaxSpeed * throttle(3)
+                                                * elevator.elevatorThrottle()) // Drive left with
+                                                                               // negative X (left)
+                                .withRotationalRate(-joystick.getRawAxis(4) * MaxAngularRate * throttle(3)
+                                                * elevator.elevatorThrottle())) // Drive
+                                                                                // counterclockwise
+                                                                                // with
+                                                                                // negative
+                                                                                // X (left)
                 );
 
                 // Joystick button to reset field-centric heading
@@ -203,33 +199,39 @@ public class RobotContainer {
                 buttonbord.button(3).whileTrue(endEffector.manualBackFeed());
 
                 // Commands for wrist and elevator control using buttonboard inputs
-                wrist.setDefaultCommand(wrist.WristPIDCommandDefault());
+                wrist.setDefaultCommand(wrist.WristPIDCommandDefault(() -> canFold.getAsBoolean()));
                 buttonbord.axisGreaterThan(0, 0.1).or(buttonbord.axisLessThan(0, -0.1))
-                                .whileTrue(wrist.ManualWrist(() -> buttonbord.getRawAxis(0)));
+                                .whileTrue(wrist.ManualWrist(() -> buttonbord.getRawAxis(0),
+                                                () -> canFold.getAsBoolean()));
 
                 // Elevator control with wrist limit consideration
                 elevator.setDefaultCommand((elevator.elevatorPIDCommandDefault(() -> wristLimiter.getAsBoolean())));
                 (wristLimiter).and((buttonbord.axisGreaterThan(1, 0.1).or(buttonbord.axisLessThan(1, -0.1)))
                                 .whileTrue(elevator.ManualElevator(() -> buttonbord.getRawAxis(1),
                                                 () -> wristLimiter.getAsBoolean())));
+                wrist.wristLimiter().onFalse(elevator.ExitState(() -> wristLimiter.getAsBoolean()));
                 // Commands to preserve position when enabled
                 this.isEnabled.onTrue(elevator.startCommand(wristLimiter));
                 this.isEnabled.onTrue(wrist.startWristCommand());
-
+                this.isDisabled.onTrue(elevator.EndCommand(wristLimiter));
                 // Wrist and elevator commands for specific positions, triggered by button
                 // presses
                 buttonbord.button(1)
-                                .onTrue(Commands.sequence(wrist.WristSafety(), elevator.ElevatorL4(wristLimiter),
-                                                wrist.WristL4()));
+                                .onTrue(Commands.sequence(wrist.WristSafety(
+                                                () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
+                                                wrist.WristL4(() -> canFold.getAsBoolean())));
                 buttonbord.button(4)
-                                .onTrue(Commands.sequence(wrist.WristSafety(), elevator.ElevatorL3(wristLimiter),
-                                                wrist.WristL3()));
+                                .onTrue(Commands.sequence(wrist.WristSafety(
+                                                () -> canFold.getAsBoolean()), elevator.ElevatorL3(wristLimiter),
+                                                wrist.WristL3(() -> canFold.getAsBoolean())));
                 buttonbord.button(7)
-                                .onTrue(Commands.sequence(wrist.WristSafety(), elevator.ElevatorL2(wristLimiter),
-                                                wrist.WristL2()));
+                                .onTrue(Commands.sequence(wrist.WristSafety(
+                                                () -> canFold.getAsBoolean()), elevator.ElevatorL2(wristLimiter),
+                                                wrist.WristL2(() -> canFold.getAsBoolean())));
                 buttonbord.button(10)
-                                .onTrue(Commands.sequence(wrist.WristSafety(), elevator.ElevatorL1(wristLimiter),
-                                                wrist.WristL1()));
+                                .onTrue(Commands.sequence(wrist.WristSafety(
+                                                () -> canFold.getAsBoolean()), elevator.ElevatorL1(wristLimiter),
+                                                wrist.WristL1(() -> canFold.getAsBoolean())));
                 buttonbord.button(12)
                                 .onTrue(Commands.parallel(wrist.ExitState(), elevator.ExitState(wristLimiter)));
 
@@ -252,6 +254,10 @@ public class RobotContainer {
                  * buttonbord.button(11).onTrue(wrist.L1Wrist());
                  * buttonbord.button(12).onTrue(wrist.Home());
                  */
+        }
+
+        private double throttle(int throttle_axis) {
+                return ((1 - (0.8 * Math.pow(this.joystick.getRawAxis(throttle_axis), 0.5))));
         }
 
         // Autonomous command that is selected based on the chosen auto mode

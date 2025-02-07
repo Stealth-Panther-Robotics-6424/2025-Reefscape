@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -38,7 +39,6 @@ public class EndEffector extends SubsystemBase {
 
   // Define a DoubleSolenoid to control the movement of the intake tray mechanism.
   // This solenoid can toggle between two positions: forward and reverse.
-  static DoubleSolenoid intakeSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 4, 5);
 
   // Shuffleboard tab for displaying the status of the intake system's sensors in
   // real-time on the driver station dashboard.
@@ -72,7 +72,7 @@ public class EndEffector extends SubsystemBase {
 
     // Set the intake solenoid to its default position, which is reverse. This would
     // retract the intake mechanism.
-    intakeSolenoid.set(Value.kReverse);
+
   }
 
   // Method to set the power of the top intake motor (TalonFX). The power is
@@ -131,120 +131,58 @@ public class EndEffector extends SubsystemBase {
 
   // Command to manually run the intake system in the forward direction (intake
   // mode).
+
+  public Command createIntakeCommand(Supplier<Double> powerSupplier) {
+    return new FunctionalCommand(
+        () -> {
+        }, // No initialization needed
+        () -> setIntake(powerSupplier.get()), // Set intake motor power dynamically
+        interrupted -> stopIntake(), // Stop motor if interrupted
+        () -> false, // Runs indefinitely
+        this // Pass the subsystem
+    );
+  }
+
+  // Overload for static power values
+  public Command createIntakeCommand(double power) {
+    return createIntakeCommand(() -> power);
+  }
+
+  // Usage of the reusable method with original names and casing
+  // Command to manually run the intake system in the forward direction (intake
+  // mode)
   public Command manualIntake() {
-    return new FunctionalCommand(
-        () -> {
-        },
-
-        () -> this.setIntake(1), // Set the intake motor to full power in forward direction.
-        interrupted -> stopIntake(), // Stop the intake motor if the command is interrupted.
-
-        () -> {
-          return false; // Command should run indefinitely until interrupted or canceled.
-        },
-
-        this // Pass this subsystem (Intake) to the command.
-    );
+    return createIntakeCommand(1);
   }
 
-  // Command to manually run the intake system in reverse (backfeeding mode).
-  // This command allows for slight reverse power to clear items or backfeed.
+  // Command to manually run the intake system in the reverse direction (backfeed
   public Command manualBackFeed() {
-    return new FunctionalCommand(
-        () -> {
-        },
-
-        () -> this.setIntake(-0.05), // Set the intake motor to low reverse power.
-        interrupted -> stopIntake(), // Stop the intake motor if the command is interrupted.
-
-        () -> {
-          return false; // Command should run indefinitely until interrupted or canceled.
-        },
-
-        this // Pass this subsystem (Intake) to the command.
-    );
+    return createIntakeCommand(-0.05);
   }
 
-  // Command to run the intake motor at full reverse power to intake algae.
+  // Command to manually run the intake system in the reverse direction (backfeed)
   public Command IntakeAlgea() {
-    return new FunctionalCommand(
-        () -> {
-        },
-
-        () -> this.setIntake(-1), // Set the intake motor to full reverse power to intake algae.
-        interrupted -> stopIntake(), // Stop the intake motor if the command is interrupted.
-
-        () -> {
-          return false; // Command should run indefinitely until interrupted or canceled.
-        },
-
-        this // Pass this subsystem (Intake) to the command.
-    );
+    return createIntakeCommand(-1);
   }
 
-  // Command to run the intake motor at full forward power to shoot algae.
+  // Command to manually run the intake system in the reverse direction (backfeed)
   public Command ShootAlgea() {
-    return new FunctionalCommand(
-        () -> {
-        },
-
-        () -> this.setIntake(1), // Set the intake motor to full forward power to shoot algae.
-        interrupted -> stopIntake(), // Stop the intake motor if the command is interrupted.
-
-        () -> {
-          return false; // Command should run indefinitely until interrupted or canceled.
-        },
-
-        this // Pass this subsystem (Intake) to the command.
-    );
+    return createIntakeCommand(1);
   }
 
-  // Command to do nothing, effectively stopping the intake motor.
-  // This is typically used when no intake action is needed.
+  // Command to stop the intake system
   public Command nothing() {
-    return new FunctionalCommand(
-        () -> {
-        },
-
-        () -> this.setIntake(0.0), // Set the intake motor to zero power (effectively stopping it).
-        interrupted -> stopIntake(), // Stop the intake motor if the command is interrupted.
-
-        () -> {
-          return false; // Command should run indefinitely until interrupted or canceled.
-        },
-
-        this // Pass this subsystem (Intake) to the command.
-    );
+    return createIntakeCommand(0.0);
   }
 
-  // Command to run the intake motor with power calculated by the intakeTestCode
-  // method.
-  // This power is conditional based on the beam break sensor statuses.
+  // Dynamic power intake based on sensor input
   public Command IntakeCoral() {
-    return new FunctionalCommand(
-        () -> {
-
-        },
-
-        () -> this.setIntake(this.intakeBeamStop(1)), // Set the intake motor to conditional power based on sensor
-                                                      // inputs.
-        interrupted -> {
-        },
-
-        () -> {
-          return false; // Command should run indefinitely until interrupted or canceled.
-        },
-
-        this // Pass this subsystem (Intake) to the command.
-    );
+    return createIntakeCommand(() -> intakeBeamStop(1));
   }
 
   // Command to toggle the intake solenoid, which controls the intake mechanism's
   // position.
   // This solenoid can switch between forward and reverse positions.
-  public Command IntakeSolenoid(BooleanSupplier IntakeSupplier) {
-    return this.runOnce(() -> intakeSolenoid.toggle()); // Toggle the intake solenoid once when the command is executed.
-  }
 
   // Periodic method that is called once per scheduler run.
   // It updates the status of the beam break sensors on the Shuffleboard
