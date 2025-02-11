@@ -22,7 +22,10 @@ import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,6 +43,9 @@ import frc.robot.subsystems.EndEffector;
 
 @SuppressWarnings("unused")
 public class RobotContainer {
+
+        private ShuffleboardTab DS_MainTab = Shuffleboard.getTab("Main");
+        private GenericEntry DS_CodeVersion = DS_MainTab.add("Code Version", Constants.codeVersion).getEntry();
 
         // Define maximum speed and angular rate based on tuner constants, converted
         // into appropriate units
