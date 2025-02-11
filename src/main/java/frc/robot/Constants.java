@@ -16,6 +16,8 @@ package frc.robot;
  */
 public final class Constants {
 
+  public static final String codeVersion = "Sprint 4.0";
+
   /**
    * The OperatorConstants class holds constants related to the operator
    * interface (OI), such as controller ports.

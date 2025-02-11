@@ -164,7 +164,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public double elevatorThrottle() {
-    return ((1 - 0.8 * (this.getElevatorPosition() / 115)));
+    return ((1 - 0.5 * (this.getElevatorPosition() / 115)));
   }
 
   public Trigger canFold() {
