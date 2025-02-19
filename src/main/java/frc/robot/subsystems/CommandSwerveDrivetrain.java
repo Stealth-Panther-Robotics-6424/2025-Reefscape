@@ -72,6 +72,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             ));
 
     // SysId routine for characterizing steer (PID tuning for steer motors)
+    @SuppressWarnings("unused")
     private final SysIdRoutine m_sysIdRoutineSteer = new SysIdRoutine(
             new SysIdRoutine.Config(
                     null, // Default ramp rate of 1 V/s
@@ -86,6 +87,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             ));
 
     // SysId routine for characterizing rotation (PID tuning for rotational control)
+    @SuppressWarnings("unused")
     private final SysIdRoutine m_sysIdRoutineRotation = new SysIdRoutine(
             new SysIdRoutine.Config(
                     Volts.of(Math.PI / 6).per(Second), // Input is in radians per second²

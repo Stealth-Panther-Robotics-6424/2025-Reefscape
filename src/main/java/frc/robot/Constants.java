@@ -86,7 +86,7 @@ public final class Constants {
   public static class ClimberConstants {
 
     // CAN ID for the motor controlling the climber
-    public static final int ClimberMotor_ID = 10;
+    public static final int ClimberMotor_ID = 18;
 
     // CAN ID for the climber encoder (used to measure the climber's position)
     public static final int ClimberCANcoder_ID = 19;

@@ -9,7 +9,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -17,7 +16,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -59,6 +60,9 @@ public class Elevator extends SubsystemBase {
 
   private GenericEntry DS_canLift = DS_ElevatorTab.add("CanLift", true).getEntry(); // Entry for canLift
 
+  private GenericEntry DS_ElevatorSetpoint = DS_ElevatorTab.add("Setpoint", elevatorController.getSetpoint())
+      .getEntry();
+
   // Default max elevator speed as defined by Shuffleboard.
   double maxElevatorSpeed = this.DS_ElevatorSpeed.getDouble(0.2);
 
@@ -98,13 +102,14 @@ public class Elevator extends SubsystemBase {
   // Trigger that checks if the elevator is in the correct position for intake
   // (position <= 1).
   public Trigger elevatorIntake() {
-    return new Trigger(() -> this.getElevatorPosition() <= 1);
+    return new Trigger(() -> this.getElevatorPosition() <= 2);
   }
 
   // Method to get the current position of the elevator by reading the position
   // from the right motor.
   public double getElevatorPosition() {
     return (elevatorTalonStrb.getPosition().getValueAsDouble());
+
   }
 
   /*
@@ -118,31 +123,28 @@ public class Elevator extends SubsystemBase {
 
   // Method to set power to both elevator motors, considering limits.
   public void setElevatorMotor(double power) {
+    double output = elevatorLimit(power);
+    double kFValue = 0.02;
+    SmartDashboard.putNumber("LimitOutput", output); //
     // Apply limit on power to prevent the elevator from exceeding boundaries (e.g.,
     // going beyond the upper or lower limit).
-    setMotorPower(elevatorTalonPort, elevatorLimit(-power)); // Apply power to the left motor with limits.
-    setMotorPower(elevatorTalonStrb, elevatorLimit(power)); // Apply power to the right motor with limits.
-  }
+    setMotorPower(elevatorTalonPort, -(output + kFValue)); // Apply power to the left motor with limits.
+    setMotorPower(elevatorTalonStrb, output + kFValue); // Apply power to the right motor with limits.
 
-  public void setElevatorMotorPID(double power) {
-    // Apply limit on power to prevent the elevator from exceeding boundaries (e.g.,
-    // going beyond the upper or lower limit).
-
-    setMotorPower(elevatorTalonPort, -power); // Apply power to the left motor with limits.
-    setMotorPower(elevatorTalonStrb, power); // Apply power to the right motor with limits.
   }
 
   // Limit the motor power based on certain conditions such as the current
   // position of the elevator and whether it can lift.
   private double elevatorLimit(double power) {
     double output = 0; // Default output is 0 (no power).
-
+    SmartDashboard.putNumber("Input", power);
     // If the elevator can't lift or if the elevator is at the top or bottom, set
     // the output power to a small value.
     if ((!canLift)
-        || (elevatorTalonStrb.getPosition().getValueAsDouble() >= 115 && power < 0)
-        || (elevatorTalonStrb.getPosition().getValueAsDouble() <= 0.5 && power > 0)) {
-      output = 0.02;
+        || (elevatorTalonStrb.getPosition().getValueAsDouble() >= 115 && power > 0)
+        || (elevatorTalonStrb.getPosition().getValueAsDouble() <= 0.5 && power < 0)) {
+
+      output = 0.0;
       // Minimal power to avoid elevator falling (redundant
       // and should not ever run). NEVER MORE THAN 0.02
     } else {
@@ -155,12 +157,22 @@ public class Elevator extends SubsystemBase {
   // Methods for controlling the elevator using PID.
 
   // Method to set the target setpoint for the elevator using the PID controller.
+  /*
+   * public void setElevatorPID(double setPoint) {
+   * if (canLift) { // If the elevator can lift, set the setpoint to the desired
+   * position.
+   * this.elevatorController.setSetpoint(setPoint);
+   * } else { // If the elevator can't lift, keep the current position as the
+   * setpoint.
+   * this.elevatorController.setSetpoint(this.getElevatorPosition());
+   * }
+   * }
+   */
+
   public void setElevatorPID(double setPoint) {
-    if (canLift) { // If the elevator can lift, set the setpoint to the desired position.
-      this.elevatorController.setSetpoint(setPoint);
-    } else { // If the elevator can't lift, keep the current position as the setpoint.
-      this.elevatorController.setSetpoint(this.getElevatorPosition());
-    }
+
+    this.elevatorController.setSetpoint(setPoint);
+
   }
 
   public double elevatorThrottle() {
@@ -179,8 +191,8 @@ public class Elevator extends SubsystemBase {
     // Call the PID controller to calculate the required power and apply it to the
     // motors.
     double PIDValue = this.elevatorController.calculate(this.getElevatorPosition());
-    double kFValue = 0.02;
-    setElevatorMotorPID(PIDValue + kFValue);
+
+    setElevatorMotor(PIDValue);
   }
 
   // Command for manual control of the elevator during teleop, allowing the driver
@@ -264,6 +276,7 @@ public class Elevator extends SubsystemBase {
         interrupted -> {
           this.setElevatorPID(this.getElevatorPosition());
           this.canLift = wristLimiter.getAsBoolean();
+          this.setElevatorMotor(0);
         }, // Nothing new runs when interrupted
 
         () -> this.elevatorAtSetpoint(), // Check if the elevator has reached L1.
@@ -273,27 +286,53 @@ public class Elevator extends SubsystemBase {
 
   // Command to move the elevator to the L1 position (0).
   public Command ElevatorL1(BooleanSupplier wristLimiter) {
+
     return MovetoPosition(wristLimiter, 0);
+
   }
 
   // Command to move the elevator to the L2 position (20)
   public Command ElevatorL2(BooleanSupplier wristLimiter) {
+
     return MovetoPosition(wristLimiter, 20);
   }
 
   // Command to move the elevator to the L3 position (52.7).
   public Command ElevatorL3(BooleanSupplier wristLimiter) {
+
     return MovetoPosition(wristLimiter, 52.7);
   }
 
   // Command to move the elevator to the L4 position (113.7).
   public Command ElevatorL4(BooleanSupplier wristLimiter) {
+
     return MovetoPosition(wristLimiter, 113.7);
+  }
+
+  public Command ElevatorA1(BooleanSupplier wristLimiter) {
+
+    return MovetoPosition(wristLimiter, 39); // original 35.17 V1 36 V2 37 V3 38
+  }
+
+  public Command ElevatorA2(BooleanSupplier wristLimiter) {
+
+    return MovetoPosition(wristLimiter, 71);
+  }
+
+  public Command ElevatorProcessor(BooleanSupplier wristLimiter) {
+
+    return MovetoPosition(wristLimiter, 0);
+  }
+
+  public Command ElevatorBarge(BooleanSupplier wristLimiter) {
+
+    return MovetoPosition(wristLimiter, 114.4);
   }
 
   // Command to exit the current elevator state and maintain its position.
   public Command ExitState(BooleanSupplier wristLimiter) {
     return MovetoPosition(wristLimiter, this.getElevatorPosition());
+
   }
 
   // Periodic method called once per scheduler run to update real-time data on
@@ -310,25 +349,10 @@ public class Elevator extends SubsystemBase {
     // Update the current status of the forward and reverse limit switches.
     this.DS_forwardLimit.setDouble((this.elevatorTalonStrb.getForwardLimit().getValueAsDouble()));
     this.DS_reverseLimit.setDouble(this.elevatorTalonStrb.getReverseLimit().getValueAsDouble());
+    this.DS_ElevatorSetpoint.setDouble(elevatorController.getSetpoint());
     this.DS_canLift.setBoolean(this.canLift);
-
+    SmartDashboard.putData(CommandScheduler.getInstance());
     // The periodic method is called to regularly update the robot's status.
   }
 
-  /*
-   * public Trigger driveThrottleL2() {
-   * return new Trigger(() -> this.getElevatorPosition() >= 19);
-   * 
-   * }
-   * 
-   * public Trigger driveThrottleL3() {
-   * return new Trigger(() -> this.getElevatorPosition() >= 52.7);
-   * 
-   * }
-   * 
-   * public Trigger driveThrottleL4() {
-   * return new Trigger(() -> this.getElevatorPosition() >= 113);
-   * 
-   * }
-   */
 }

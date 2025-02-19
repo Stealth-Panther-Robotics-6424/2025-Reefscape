@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -12,9 +11,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -22,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Constants.EndEffectorConstants;
 
 public class EndEffector extends SubsystemBase {
   /** Creates a new endEffector subsystem. */
@@ -162,12 +157,16 @@ public class EndEffector extends SubsystemBase {
 
   // Command to manually run the intake system in the reverse direction (backfeed)
   public Command IntakeAlgea() {
-    return createIntakeCommand(-1);
+    return createIntakeCommand(-0.4);
+  }
+
+  public Command HoldAlgea() {
+    return createIntakeCommand(-0.035);
   }
 
   // Command to manually run the intake system in the reverse direction (backfeed)
   public Command ShootAlgea() {
-    return createIntakeCommand(1);
+    return createIntakeCommand(.4);
   }
 
   // Command to stop the intake system

@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -46,6 +47,7 @@ public class RobotContainer {
 
         private ShuffleboardTab DS_MainTab = Shuffleboard.getTab("Main");
         private GenericEntry DS_CodeVersion = DS_MainTab.add("Code Version", Constants.codeVersion).getEntry();
+        private GenericEntry DS_AlgeaMode = DS_MainTab.add("Algea Mode", false).getEntry();
 
         // Define maximum speed and angular rate based on tuner constants, converted
         // into appropriate units
@@ -85,6 +87,8 @@ public class RobotContainer {
         private final EndEffector endEffector = new EndEffector(); // Intake subsystem for grabbing objects
         private final Climber climber = new Climber(); // Intake subsystem for grabbing objects
 
+        private boolean AlgeaMode = false;
+
         // Instantiate the swerve drivetrain subsystem
         public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
         // Define triggers for controlling wrist and elevator limits
@@ -94,6 +98,7 @@ public class RobotContainer {
         private final Trigger elevatorIntake = elevator.elevatorIntake();
         private final Trigger isEnabled = new Trigger(() -> DriverStation.isEnabled());
         private final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
+        private final Trigger algeaModeEnabled = new Trigger(() -> getAlgeaMode());
 
         /* Some triggers related to elevator throttles (to be developed in Sprint 4) */
         /*
@@ -129,8 +134,21 @@ public class RobotContainer {
                 configureBindings(); // Configure control bindings for robot functions
         }
 
+        public boolean getAlgeaMode() {
+                return this.AlgeaMode;
+
+        }
+
+        public void DS_Update() {
+                this.DS_AlgeaMode.setBoolean(this.getAlgeaMode());
+
+        }
+
         // Configure the control bindings for the robot's subsystems and commands
         private void configureBindings() {
+
+                buttonbord.button(8).onTrue(Commands.runOnce(() -> this.AlgeaMode = !this.AlgeaMode));
+
                 // Drivetrain control for swerve drive based on joystick input
                 drivetrain.setDefaultCommand(
                                 // Drivetrain will execute this command periodically
@@ -179,7 +197,7 @@ public class RobotContainer {
                 joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
                 // Joystick button to apply the brake to stop all swerve drive modules
-                joystick.button(6).whileTrue(drivetrain.applyRequest(() -> brake));
+                joystick.button(4).whileTrue(drivetrain.applyRequest(() -> brake));
 
                 // Button to point the wheels in a specific direction based on joystick input
                 joystick.button(3).whileTrue(drivetrain.applyRequest(
@@ -187,23 +205,35 @@ public class RobotContainer {
                                                 new Rotation2d(-joystick.getRawAxis(1), -joystick.getRawAxis(0)))));
 
                 // Run SysId routines when specific button combinations are pressed
-                joystick.button(7).and(joystick.button(4)).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-                joystick.button(7).and(joystick.button(1)).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-                joystick.button(8).and(joystick.button(4)).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-                joystick.button(8).and(joystick.button(1)).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
-                // Reset the field-centric heading on button B
-                joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-
+                /*
+                 * joystick.button(7).and(joystick.button(4)).whileTrue(drivetrain.sysIdDynamic(
+                 * Direction.kForward));
+                 * joystick.button(7).and(joystick.button(1)).whileTrue(drivetrain.sysIdDynamic(
+                 * Direction.kReverse));
+                 * joystick.button(8).and(joystick.button(4)).whileTrue(drivetrain.
+                 * sysIdQuasistatic(Direction.kForward));
+                 * joystick.button(8).and(joystick.button(1)).whileTrue(drivetrain.
+                 * sysIdQuasistatic(Direction.kReverse));
+                 */
                 // Register telemetry logging for the drivetrain subsystem
                 // drivetrain.registerTelemetry(logger::telemeterize);
 
                 // Intake command bindings, such as when to turn on intake or control trays
                 endEffector.setDefaultCommand(endEffector.nothing());
-                ((elevator.elevatorIntake().and(wrist.wristIntake()))).whileTrue(endEffector.IntakeCoral());
-                buttonbord.button(5).whileTrue(endEffector.IntakeCoral());
-                buttonbord.button(2).whileTrue(endEffector.manualIntake());
-                buttonbord.button(3).whileTrue(endEffector.manualBackFeed());
+                algeaModeEnabled.negate().and(elevator.elevatorIntake().and(wrist.wristIntake()))
+                                .whileTrue(endEffector.IntakeCoral());
+                algeaModeEnabled.negate().and(buttonbord.button(5)).whileTrue(endEffector.IntakeCoral());
+                algeaModeEnabled.negate().and(buttonbord.button(2)).whileTrue(endEffector.manualIntake());
+                algeaModeEnabled.negate().and(buttonbord.button(3)).whileTrue(endEffector.manualBackFeed());
+                algeaModeEnabled.and(buttonbord.button(5)).whileTrue(endEffector.IntakeAlgea());
+
+                algeaModeEnabled.and(buttonbord.button(5).negate()).and(buttonbord.button(2)
+                                .negate())
+                                .whileTrue(endEffector.HoldAlgea());
+
+                // buttonbord.button(6).whileTrue(endEffector.HoldAlgea());
+                algeaModeEnabled.and(buttonbord.button(2)).and(buttonbord.button(5).negate())
+                                .whileTrue(endEffector.ShootAlgea());
 
                 // Commands for wrist and elevator control using buttonboard inputs
                 wrist.setDefaultCommand(wrist.WristPIDCommandDefault(() -> canFold.getAsBoolean()));
@@ -216,51 +246,74 @@ public class RobotContainer {
                 (wristLimiter).and((buttonbord.axisGreaterThan(1, 0.1).or(buttonbord.axisLessThan(1, -0.1)))
                                 .whileTrue(elevator.ManualElevator(() -> buttonbord.getRawAxis(1),
                                                 () -> wristLimiter.getAsBoolean())));
-                wrist.wristLimiter().onFalse(elevator.ExitState(() -> wristLimiter.getAsBoolean()));
+
                 // Commands to preserve position when enabled
                 this.isEnabled.onTrue(elevator.startCommand(wristLimiter));
                 this.isEnabled.onTrue(wrist.startWristCommand());
                 this.isDisabled.onTrue(elevator.EndCommand(wristLimiter));
+
                 // Wrist and elevator commands for specific positions, triggered by button
                 // presses
-                buttonbord.button(1)
+                algeaModeEnabled.negate().and(buttonbord.button(1))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
                                                 wrist.WristL4(() -> canFold.getAsBoolean())));
-                buttonbord.button(4)
+                algeaModeEnabled.negate().and(buttonbord.button(4))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorL3(wristLimiter),
                                                 wrist.WristL3(() -> canFold.getAsBoolean())));
-                buttonbord.button(7)
+                algeaModeEnabled.negate().and(buttonbord.button(7))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorL2(wristLimiter),
                                                 wrist.WristL2(() -> canFold.getAsBoolean())));
-                buttonbord.button(10)
+                algeaModeEnabled.negate().and(buttonbord.button(11))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorL1(wristLimiter),
                                                 wrist.WristL1(() -> canFold.getAsBoolean())));
+                // Algea Positions//
+                algeaModeEnabled.and(buttonbord.button(7))
+                                .onTrue(Commands.sequence(wrist.WristSafety(
+                                                () -> canFold.getAsBoolean()), elevator.ElevatorA1(wristLimiter),
+                                                wrist.WristA1(() -> canFold.getAsBoolean())));
+
+                algeaModeEnabled.and(buttonbord.button(4))
+                                .onTrue(Commands.sequence(wrist.WristSafety(
+                                                () -> canFold.getAsBoolean()),
+                                                elevator.ElevatorA2(wristLimiter),
+                                                wrist.WristA2(() -> canFold
+                                                                .getAsBoolean())));
+
+                algeaModeEnabled.and(buttonbord.button(1))
+                                .onTrue(Commands.sequence(wrist.WristSafety(
+                                                () -> canFold.getAsBoolean()), elevator.ElevatorBarge(wristLimiter),
+                                                wrist.WristBarge(() -> canFold.getAsBoolean())));
+
+                algeaModeEnabled.and(buttonbord.button(11))
+                                .onTrue(Commands.sequence(wrist.WristSafety(
+                                                () -> canFold.getAsBoolean()),
+                                                elevator.ElevatorProcessor(wristLimiter),
+                                                wrist.WristProcessor(() -> canFold
+                                                                .getAsBoolean())));
+
+                algeaModeEnabled.and(buttonbord.button(9))
+                                .onTrue(Commands.sequence(wrist.WristSafety(
+                                                () -> canFold.getAsBoolean()),
+                                                elevator.ElevatorProcessor(wristLimiter),
+                                                wrist.WristProcessor(() -> canFold
+                                                                .getAsBoolean())));
+
+                joystick.button(5).or(joystick.button(6))
+                                .onTrue(climber.ManualClimber(() -> joystick.button(6).getAsBoolean(),
+                                                () -> joystick.button(5).getAsBoolean()));
+
                 buttonbord.button(12)
-                                .onTrue(Commands.parallel(wrist.ExitState(), elevator.ExitState(wristLimiter)));
+                                .onTrue(Commands.parallel(wrist.ExitState(() -> canFold.getAsBoolean()),
+                                                elevator.ExitState(wristLimiter)));
 
                 // Buttonboard button 8 toggles manual tray control for the intake
-                buttonbord.button(8)
+                buttonbord.button(10)
                                 .toggleOnTrue(climber.TrayManual());
 
-                // Additional button press mappings for elevator and wrist control
-                /*
-                 * buttonbord.button(1).onTrue(elevator.L4Elevator(wristLimiter));
-                 * buttonbord.button(4).onTrue(elevator.L3Elevator(wristLimiter));
-                 * buttonbord.button(7).onTrue(elevator.L2Elevator(wristLimiter));
-                 * buttonbord.button(10).onTrue(elevator.Home(wristLimiter));
-                 */
-
-                /*
-                 * buttonbord.button(3).onTrue(wrist.L4Wrist());
-                 * buttonbord.button(6).onTrue(wrist.L3Wrist());
-                 * buttonbord.button(9).onTrue(wrist.L2Wrist());
-                 * buttonbord.button(11).onTrue(wrist.L1Wrist());
-                 * buttonbord.button(12).onTrue(wrist.Home());
-                 */
         }
 
         private double throttle(int throttle_axis) {

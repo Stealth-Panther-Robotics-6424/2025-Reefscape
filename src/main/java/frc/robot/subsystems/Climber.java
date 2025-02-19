@@ -4,14 +4,12 @@
 
 package frc.robot.subsystems;
 
-import java.util.function.DoubleSupplier;
-
+import java.util.function.BooleanSupplier;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.motorcontrol.VictorSP;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -116,79 +114,79 @@ public class Climber extends SubsystemBase {
    * functionality is needed.
    */
 
-  /*
-   * public void setClimberMotor (double power)
-   * {
-   * // Calls the setMotorPower method with the power returned from the
-   * climberLimit method
-   * setMotorPower(climberTalon, climberLimit(power) );
-   * 
-   * }
-   * 
-   * /* private double climberLimit(double power){
-   * // Initially sets the output power to 0
-   * double output=0;
-   * 
-   * // This condition checks if the climber has reached its upper limit (position
-   * > 0.4) and the requested power is negative,
-   * // OR if the climber has reached its lower limit (position < 0.01) and the
-   * requested power is positive.
-   * // If either of these conditions is true, the motor power is set to 0 to
-   * prevent movement beyond limits.
-   * if ((climberCanCoder.getAbsolutePosition().getValueAsDouble()>0.4&&
-   * power<0)||(climberCanCoder.getAbsolutePosition().getValueAsDouble()<0.01&&
-   * power>0))
-   * {
-   * output = 0; // Prevent movement beyond the limits of the climber mechanism
-   * }
-   * else{
-   * output=power; // Allow the requested power if within the safe position limits
-   * }
-   * return output; // Return the constrained power value
-   * }
-   * 
-   * // This method returns the current position of the climber from the CANcoder
-   * sensor.
-   * // The TODO suggests converting the raw position data to degrees (likely a
-   * scaling factor is needed).
-   * public double getClimberPosition(){
-   * return (climberCanCoder.getAbsolutePosition().getValueAsDouble())TODO
-   * Multiple to make read in degrees ;
-   * }
-   * 
-   * // The following commented-out method defines a command for manually
-   * controlling the wrist of the climber system
-   * // based on joystick input. The code is currently not active, but might be
-   * implemented later.
-   * // The joystick input would adjust the wrist motor’s position with a scaling
-   * factor (0.2 in this case).
-   * // The method uses a FunctionalCommand to execute the manual wrist control.
-   * 
-   * //Commands
-   * 
-   * public Command ManualWrist(DoubleSupplier wristJoystick ){
-   * return new FunctionalCommand(
-   * ()-> {}, // Initialize the command (no setup required)
-   * 
-   * ()-> this.setWristMotor(wristJoystick.getAsDouble()*0.2), // During the
-   * command execution, set the wrist motor's power based on joystick input,
-   * scaled by 0.2
-   * 
-   * // If the command is interrupted, reset the wrist position using PID control
-   * to return to a target position.
-   * interrupted -> this.setWristPID(getWristPosition()),
-   * 
-   * // End condition for the command (this version of the command does not have
-   * an end condition, so it will never automatically finish)
-   * ()-> {return false;},
-   * 
-   * // The subsystem (Climber) that this command is associated with. It will be
-   * run on the Climber subsystem.
-   * this
-   * 
-   * );
-   * }
-   */
+  public void setClimberMotor(double power) {
+    // Calls the setMotorPower method with the power returned from the
+
+    setMotorPower(climberTalon, power);
+
+  }
+
+  private double climberLimit(double power) {
+    // Initially sets the output power to 0
+    double output = 0;
+
+    // This condition checks if the climber has reached its upper limit (position>
+    // 0.4) and the requested power is negative,
+    // OR if the climber has reached its lower limit (position < 0.01) and the
+
+    // If either of these conditions is true, the motor power is set to 0 to
+
+    if ((climberCanCoder.getAbsolutePosition().getValueAsDouble() > 0.4 &&
+        power < 0)
+        || (climberCanCoder.getAbsolutePosition().getValueAsDouble() < 0.01 &&
+            power > 0)) {
+      output = 0; // Prevent movement beyond the limits of the climber mechanism
+    } else {
+      output = power; // Allow the requested power if within the safe position limits
+    }
+    return output; // Return the constrained power value
+  }
+
+  // This method returns the current position of the climber from the CANcoder
+
+  // The TODO suggests converting the raw position data to degrees (likely
+  // ascaling factor is needed).
+  public double getClimberPosition() {
+    return (climberCanCoder.getAbsolutePosition().getValueAsDouble());
+  }
+
+  // The following commented-out method defines a command for manually
+
+  // based on joystick input. The code is currently not active, but might be
+
+  // The joystick input would adjust the wrist motor’s position with a scaling
+
+  // The method uses a FunctionalCommand to execute the manual wrist control.
+
+  // Commands
+
+  public Command ManualClimber(BooleanSupplier forwards, BooleanSupplier backwards) {
+    return new FunctionalCommand(
+        () -> {
+
+        }, // Initialize: No action needed
+        () -> {
+          if (forwards.getAsBoolean()) {
+            setClimberMotor(.2);
+          } else if (backwards.getAsBoolean()) {
+            setClimberMotor(-0.2);
+          } else {
+            setClimberMotor(0);
+          }
+        }, // Execute: Set wrist motor power based
+        // this.wristSpeed
+        // on joystick
+        // input (scaled by 0.2 for control)
+        interrupted -> {
+          setClimberMotor(0);
+        }, // Interrupted: Reset to the current wrist position if
+           // interrupted
+        () -> {
+          return false; // Finish condition: Always false, meaning the command never finishes
+                        // automatically
+        },
+        this); // Subsystem: This command is bound to the Wrist subsystem
+  }
 
   // This method is called periodically by the robot’s scheduler to update the
   // subsystem.
@@ -201,9 +199,9 @@ public class Climber extends SubsystemBase {
   public Command TrayManual() {
     return new FunctionalCommand(() -> {
     }, () -> {
-      this.setTray(1); // Set the tray motor to forward power.
+      setTray(1); // Set the tray motor to forward power.
     }, interrpted -> {
-      this.setTray(-1); // Set the tray motor to reverse power if the command is interrupted.
+      setTray(-1); // Set the tray motor to reverse power if the command is interrupted.
     }, () -> {
       return false; // Command should run indefinitely until interrupted or canceled.
     }, this); // Pass this subsystem (Intake) to the command.
