@@ -6,6 +6,7 @@
  *  Base Sprint 1/27/2025
  *  Base Sprint 3.0 
  *  Base Sprint 4.0
+ *  Base Sprint 5.0
 */
 
 // Import necessary packages for robot control, mathematical operations, and subsystem handling
@@ -73,7 +74,7 @@ public class RobotContainer {
         private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
         /* Path follower for autonomous control */
-        // private final SendableChooser<Command> autoChooser;
+        private final SendableChooser<Command> autoChooser;
 
         // Create a telemetry logger for monitoring robot stats
         // private final Telemetry logger = new Telemetry(MaxSpeed);
@@ -90,7 +91,8 @@ public class RobotContainer {
         private boolean AlgeaMode = false;
 
         // Instantiate the swerve drivetrain subsystem
-        public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+        public final CommandSwerveDrivetrain drivetrain;
+
         // Define triggers for controlling wrist and elevator limits
         private final Trigger wristLimiter = wrist.wristLimiter();
         private final Trigger canFold = elevator.canFold();
@@ -116,31 +118,28 @@ public class RobotContainer {
          */
         public RobotContainer() {
                 // Set up autonomous command chooser using PathPlanner
-                // autoChooser = AutoBuilder.buildAutoChooser();
-                // SmartDashboard.putData("Auto Mode", autoChooser); // Display auto mode
+                drivetrain = TunerConstants.createDrivetrain();
+                autoChooser = AutoBuilder.buildAutoChooser();
+                SmartDashboard.putData("Auto Mode", autoChooser); // Display auto mode
                 // selector on the dashboard
 
                 // Define and register commands for the intake subsystem with different
                 // behaviors
-                /*
-                 * NamedCommands.registerCommand("IntakeCoral", intake.IntakeCoral(() -> true,
-                 * () -> false).withTimeout(3));
-                 * NamedCommands.registerCommand("StopIntake", intake.IntakeCoral(() -> false,
-                 * () -> false).withTimeout(0.1));
-                 * NamedCommands.registerCommand("SpitCoral", intake.IntakeCoral(() -> false, ()
-                 * -> true).withTimeout(3));
-                 */
+
+                NamedCommands.registerCommand("IntakeCoral", endEffector.manualIntake().withTimeout(3));
+                NamedCommands.registerCommand("StopIntake", endEffector.manualIntake().withTimeout(0.1));
+                NamedCommands.registerCommand("SpitCoral", endEffector.manualIntake().withTimeout(3));
 
                 configureBindings(); // Configure control bindings for robot functions
         }
 
-        public boolean getAlgeaMode() {
+        public boolean getAlgeaMode() { // Sets whether the commands are based on algea or coral
                 return this.AlgeaMode;
 
         }
 
         public void DS_Update() {
-                this.DS_AlgeaMode.setBoolean(this.getAlgeaMode());
+                this.DS_AlgeaMode.setBoolean(this.getAlgeaMode()); // updates the current mode of the robot
 
         }
 
@@ -218,22 +217,35 @@ public class RobotContainer {
                 // Register telemetry logging for the drivetrain subsystem
                 // drivetrain.registerTelemetry(logger::telemeterize);
 
-                // Intake command bindings, such as when to turn on intake or control trays
-                endEffector.setDefaultCommand(endEffector.nothing());
+                // Endeffector command bindings, such as when to turn on intake or control trays
+                endEffector.setDefaultCommand(endEffector.nothing()); // Default is do nothing
+                // Coral Commands
                 algeaModeEnabled.negate().and(elevator.elevatorIntake().and(wrist.wristIntake()))
-                                .whileTrue(endEffector.IntakeCoral());
-                algeaModeEnabled.negate().and(buttonbord.button(5)).whileTrue(endEffector.IntakeCoral());
-                algeaModeEnabled.negate().and(buttonbord.button(2)).whileTrue(endEffector.manualIntake());
-                algeaModeEnabled.negate().and(buttonbord.button(3)).whileTrue(endEffector.manualBackFeed());
-                algeaModeEnabled.and(buttonbord.button(5)).whileTrue(endEffector.IntakeAlgea());
+                                .whileTrue(endEffector.IntakeCoral());// When algea mode is disabled and the elevator
+                                                                      // and wrist are in the L1 position
 
+                // intake coral
+
+                algeaModeEnabled.negate().and(buttonbord.button(5)).whileTrue(endEffector.IntakeCoral());
+                // When algea mode is diabled and button 5 is hit Intake coral manually
+                algeaModeEnabled.negate().and(buttonbord.button(2)).whileTrue(endEffector.manualIntake());
+                // When algea mode is diabled and button 2 is hit shoot coral
+                algeaModeEnabled.negate().and(buttonbord.button(3)).whileTrue(endEffector.manualBackFeed());
+                // When algea mode is diabled and button 3 is hit backfeed coral
+
+                // Algea Commands
+                algeaModeEnabled.and(buttonbord.button(5)).whileTrue(endEffector.IntakeAlgea());
+                // When algea mode is enabled and button 5 is hit Intake algea
                 algeaModeEnabled.and(buttonbord.button(5).negate()).and(buttonbord.button(2)
                                 .negate())
                                 .whileTrue(endEffector.HoldAlgea());
+                // When algea mode is enabled and button 2 and button 5 are not hit hold algea
+                // by applying a 3% back spin
 
-                // buttonbord.button(6).whileTrue(endEffector.HoldAlgea());
                 algeaModeEnabled.and(buttonbord.button(2)).and(buttonbord.button(5).negate())
                                 .whileTrue(endEffector.ShootAlgea());
+                // When algea mode is enabled and button 2 is hit and button 5 is not hit shoot
+                // algea
 
                 // Commands for wrist and elevator control using buttonboard inputs
                 wrist.setDefaultCommand(wrist.WristPIDCommandDefault(() -> canFold.getAsBoolean()));
@@ -250,7 +262,7 @@ public class RobotContainer {
                 // Commands to preserve position when enabled
                 this.isEnabled.onTrue(elevator.startCommand(wristLimiter));
                 this.isEnabled.onTrue(wrist.startWristCommand());
-                this.isDisabled.onTrue(elevator.EndCommand(wristLimiter));
+                // this.isDisabled.onTrue(elevator.EndCommand(wristLimiter));
 
                 // Wrist and elevator commands for specific positions, triggered by button
                 // presses
@@ -311,8 +323,18 @@ public class RobotContainer {
                                                 elevator.ExitState(wristLimiter)));
 
                 // Buttonboard button 8 toggles manual tray control for the intake
+
+                joystick.button(7).onTrue(Commands.sequence(wrist.WristSafety(
+                                () -> canFold.getAsBoolean()),
+                                elevator.ElevatorL1(wristLimiter),
+                                wrist.WristClimber(() -> canFold
+                                                .getAsBoolean())));
+
+                joystick.button(7)
+                                .toggleOnTrue(climber.TrayManualUp());
+
                 buttonbord.button(10)
-                                .toggleOnTrue(climber.TrayManual());
+                                .toggleOnTrue(climber.TrayManualDown());
 
         }
 
@@ -323,6 +345,6 @@ public class RobotContainer {
         // Autonomous command that is selected based on the chosen auto mode
         public Command getAutonomousCommand() {
                 /* Run the path selected from the auto chooser */
-                return null; // autoChooser.getSelected();
+                return autoChooser.getSelected();
         }
 }

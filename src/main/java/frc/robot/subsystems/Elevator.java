@@ -36,7 +36,7 @@ public class Elevator extends SubsystemBase {
   private final TalonFX elevatorTalonStrb = new TalonFX(Constants.ElevatorConstants.ElevatorStrbMotor_ID);
 
   // Flag to check if the elevator is allowed to lift based on a condition.
-  private boolean canLift = false;
+  private boolean canLift = false; // This variable sets whether the elevator can move up or down
 
   // Create a PID controller to control the elevator position, with initial PID
   // values (Proportional, Integral, Derivative).
@@ -67,7 +67,7 @@ public class Elevator extends SubsystemBase {
   double maxElevatorSpeed = this.DS_ElevatorSpeed.getDouble(0.2);
 
   public Elevator() {
-    // Set both motor controllers to Brake mode to stop the motors from coasting
+    // Set both motor controllers to Coast mode to stop the motors from coasting
     // when no power is applied.
     elevatorTalonPort.setNeutralMode(NeutralModeValue.Coast);
     elevatorTalonStrb.setNeutralMode(NeutralModeValue.Coast);
@@ -130,6 +130,8 @@ public class Elevator extends SubsystemBase {
     // going beyond the upper or lower limit).
     setMotorPower(elevatorTalonPort, -(output + kFValue)); // Apply power to the left motor with limits.
     setMotorPower(elevatorTalonStrb, output + kFValue); // Apply power to the right motor with limits.
+    // we added kF value to here to make sure the elevator will hold when it is fed
+    // a zero from its limiter
 
   }
 
@@ -141,12 +143,13 @@ public class Elevator extends SubsystemBase {
     // If the elevator can't lift or if the elevator is at the top or bottom, set
     // the output power to a small value.
     if ((!canLift)
-        || (elevatorTalonStrb.getPosition().getValueAsDouble() >= 115 && power > 0)
+        || (elevatorTalonStrb.getPosition().getValueAsDouble() >= 115 && power > 0) // Positive Power makes the
+        // robot go up negative makes the robot go down
         || (elevatorTalonStrb.getPosition().getValueAsDouble() <= 0.5 && power < 0)) {
 
       output = 0.0;
-      // Minimal power to avoid elevator falling (redundant
-      // and should not ever run). NEVER MORE THAN 0.02
+      // Output is zero but is given a kf value of .02 when it is applied to the motor
+      // to allow the elevator to hold.
     } else {
       output = power;
       // Otherwise, apply the requested power to the motors.
@@ -155,31 +158,21 @@ public class Elevator extends SubsystemBase {
   }
 
   // Methods for controlling the elevator using PID.
-
-  // Method to set the target setpoint for the elevator using the PID controller.
-  /*
-   * public void setElevatorPID(double setPoint) {
-   * if (canLift) { // If the elevator can lift, set the setpoint to the desired
-   * position.
-   * this.elevatorController.setSetpoint(setPoint);
-   * } else { // If the elevator can't lift, keep the current position as the
-   * setpoint.
-   * this.elevatorController.setSetpoint(this.getElevatorPosition());
-   * }
-   * }
-   */
-
   public void setElevatorPID(double setPoint) {
 
-    this.elevatorController.setSetpoint(setPoint);
+    this.elevatorController.setSetpoint(setPoint); // Tells the PID controller what the setpoint is
 
   }
 
   public double elevatorThrottle() {
-    return ((1 - 0.5 * (this.getElevatorPosition() / 115)));
+    return ((1 - 0.5 * (this.getElevatorPosition() / 115))); // This method is used to slow the drivespeed down based on
+                                                             // the elevator position
+    // any slower than this wwill make slowmode not be able to be held down on the
+    // controller or the robot cannot move
   }
 
-  public Trigger canFold() {
+  public Trigger canFold() { // this method sets whether the wrist can fold back based on the elevator
+                             // position this prevents folding back into the crossmembers
     return new Trigger(() -> !((this.getElevatorPosition() >= 26) && (this.getElevatorPosition() <= 50.5)
         || (this.getElevatorPosition() >= 59.0) && (this.getElevatorPosition() <= 104)));
 
@@ -229,12 +222,14 @@ public class Elevator extends SubsystemBase {
     );
   }
 
-  public Command EndCommand(BooleanSupplier wristLimiter) {
-    return this.runOnce(() -> {
-      elevatorTalonPort.setNeutralMode(NeutralModeValue.Brake);
-      elevatorTalonStrb.setNeutralMode(NeutralModeValue.Brake);
-    });
-  }
+  /*
+   * public Command EndCommand(BooleanSupplier wristLimiter) {
+   * return this.runOnce(() -> {
+   * elevatorTalonPort.setNeutralMode(NeutralModeValue.Brake);
+   * elevatorTalonStrb.setNeutralMode(NeutralModeValue.Brake);
+   * });
+   * }
+   */
 
   // Default PID elevator control command, continuously adjusting the elevator's
   // position based on the PID controller.

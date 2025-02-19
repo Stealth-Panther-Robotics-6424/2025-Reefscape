@@ -89,7 +89,7 @@ public final class Constants {
     public static final int ClimberMotor_ID = 18;
 
     // CAN ID for the climber encoder (used to measure the climber's position)
-    public static final int ClimberCANcoder_ID = 19;
+    public static final int ClimberCANcoder_ID = 20;
 
     // Pin numbers for high and low limit switches on the climber
     public static final int HILimitPin = 5;

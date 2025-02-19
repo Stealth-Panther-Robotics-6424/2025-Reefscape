@@ -255,7 +255,7 @@ public class Wrist extends SubsystemBase {
 
   // Command to start the wrist motor but with no action (used for state
   // transitions)
-  public Command startWristCommand() {
+  public Command startWristCommand() { // This command makes the wrist hold its starting position
     return this.runOnce(() -> {
       this.setWristPID(this.getWristPosition());
     });
@@ -263,11 +263,13 @@ public class Wrist extends SubsystemBase {
 
   // Command to ensure the wrist is moved to a safe position
   public Command WristSafety(BooleanSupplier canFold) {
-    return wristCommandFactory(canFold, 0.045).until(() -> this.getWristPosition() < 0.07);
+    return wristCommandFactory(canFold, 0.045).until(() -> this.getWristPosition() < 0.07); // this command makes
+    // sure the wrist is in an orientation that can't crash
   }
 
   // Commands for moving the wrist to various predefined positions (L1, L2, L3,
-  // L4)
+  // L4) to edit these positions change the number linked to the position inside
+  // wristCommandFactory
   public Command WristL1(BooleanSupplier canFold) {
     return wristCommandFactory(canFold, 0.459);
     // Subsystem: This command is bound to the Wrist subsystem
@@ -305,6 +307,11 @@ public class Wrist extends SubsystemBase {
 
   public Command WristProcessor(BooleanSupplier canFold) {
     return wristCommandFactory(canFold, 0.01);
+    // Subsystem: This command is bound to the Wrist subsystem
+  }
+
+  public Command WristClimber(BooleanSupplier canFold) {
+    return wristCommandFactory(canFold, 0.4);
     // Subsystem: This command is bound to the Wrist subsystem
   }
 
