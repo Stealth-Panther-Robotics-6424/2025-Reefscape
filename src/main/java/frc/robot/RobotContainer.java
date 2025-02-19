@@ -119,18 +119,21 @@ public class RobotContainer {
         public RobotContainer() {
                 // Set up autonomous command chooser using PathPlanner
                 drivetrain = TunerConstants.createDrivetrain();
-                autoChooser = AutoBuilder.buildAutoChooser();
-                SmartDashboard.putData("Auto Mode", autoChooser); // Display auto mode
+             
                 // selector on the dashboard
 
                 // Define and register commands for the intake subsystem with different
                 // behaviors
 
+           
+                configureBindings(); // Configure control bindings for robot functions
+
                 NamedCommands.registerCommand("IntakeCoral", endEffector.manualIntake().withTimeout(3));
                 NamedCommands.registerCommand("StopIntake", endEffector.manualIntake().withTimeout(0.1));
                 NamedCommands.registerCommand("SpitCoral", endEffector.manualIntake().withTimeout(3));
 
-                configureBindings(); // Configure control bindings for robot functions
+                autoChooser = AutoBuilder.buildAutoChooser();
+                SmartDashboard.putData("Auto Mode", autoChooser); // Display auto mode
         }
 
         public boolean getAlgeaMode() { // Sets whether the commands are based on algea or coral
