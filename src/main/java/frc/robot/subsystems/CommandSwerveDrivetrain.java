@@ -307,4 +307,80 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 this // This class as the subsystem for requirements
         );
     }
+
+    // TODO Check out wills code for the following methods
+    /** Method to pid contorl drivetrain to a specific pose (x, y, theta) 
+     * based of a vision target while also using joystick imput adjust the P Controlers Setpoint to allow for fine tune adjustments.
+     * @param xAxis (meters) x-axis of joystick for fine adjustment
+     * @param yAxis (meters) y-axis of joystick for fine adjustment
+     * @param rotAxis (radian) rotation axis of joystick for fine adjustment
+     * @param pose (meters and radians) current visionpose of the robot in robot to target space
+     * @param targetPose  (meters and radians) target visionpose of the robot in robot to target space  
+     * @return output array of doubles range -1 to 1  to feed into a swerve request fusing joystick control and P loop control
+    */
+    public double[] driveToPose(double xAxis, double yAxis, double rotAxis,Pose2d pose, Pose2d targetPose) {
+        double dx = targetPose.getX()- pose.getX()-xAxis*0.5;// find the error in distance  in meters for  x and then add a joystick adjustment to the distance to fine adjust 
+        double dy = targetPose.getY()- pose.getY()-yAxis*0.5;   // find the error in distance in meters  for y and then add a joystick adjustment to the distance to fine adjust
+        double dtheta = targetPose.getRotation().getRadians()- pose.getRotation().getRadians()-rotAxis*0.5; // find the error in angel in radians for theta and then add a joystick adjustment to the angle to fine adjust
+
+        // P control for x, y, and theta hard coded to allow for easier use
+        double xSpeed = dx * 0.1;
+        double ySpeed = dy * 0.1;
+        double thetaSpeed = dtheta * 0.1;
+
+        // limit the speed of the robot to 0.2
+        if (Math.abs(xSpeed) > 0.2) {
+            xSpeed = xSpeed>0?0.2:-0.2;
+        }
+        if (Math.abs(ySpeed) > 0.2) {
+            ySpeed = ySpeed>0?0.2:-0.2;
+        }
+        if (Math.abs(thetaSpeed) > 0.2) {
+            thetaSpeed = thetaSpeed>0?0.2:-0.2;
+        }
+
+        double[] output=new double[] {xSpeed, ySpeed, thetaSpeed};
+     
+        // return the speed of the robot in x, y, and theta
+        return output;
+     
+    }
+
+    /**
+     * Aligns the robot to a vision target based on the robot's current pose and the adjusted joystick values.
+     * @param xAxis x-axis of joystick for fine adjustment
+     * @param yAxis y-axis of joystick for fine adjustment
+     * @param rotAxis   rotation axis of joystick for fine adjustment
+     * @param pose current visionpose of the robot in robot to target space
+     * @param targetPose    target visionpose of the robot in robot to target space
+     * @param robotCentricDrive robot-centric drive mode for alignment
+     * @return
+     */
+    public SwerveRequest allignToTag(double xAxis, double yAxis, double rotAxis,Pose2d robotToTargetPose, Pose2d targetBotToOffestPose,SwerveRequest.RobotCentric robotCentricDrive) {
+        double[] speeds = driveToPose(xAxis, yAxis, rotAxis,robotToTargetPose, targetBotToOffestPose);
+
+        return  robotCentricDrive
+        .withVelocityX(speeds[0] )// Drive forward with negative Y (forward)
+        .withVelocityY(speeds[1]) // Drive left with negative X (left)
+        .withRotationalRate(speeds[2]) ;// Drive counterclockwise with negative X (left);
+    }
+
+     /**
+     * Aligns the robot to the left of Tag 21 on the field  vision target based on the robot's current pose and  uses the joystick values to adjust the P setpoint to account for variation.
+     * @param xAxis x-axis of joystick for fine adjustment
+     * @param yAxis y-axis of joystick for fine adjustment
+     * @param rotAxis   rotation axis of joystick for fine adjustment
+     * @param pose current visionpose of the robot in robot to target space
+     * @param targetPose    target visionpose of the robot in robot to target space
+     * @param robotCentricDrive robot-centric drive mode for alignment
+     * @return
+     */
+    public SwerveRequest allignToTag21Left(double xAxis, double yAxis, double rotAxis,SwerveRequest.FieldCentric fieldCentricCentricDrive) {
+        double[] speeds = driveToPose(xAxis, yAxis, rotAxis,getState().Pose,new Pose2d(5.84,3.845,new Rotation2d(174)));
+
+        return  fieldCentricCentricDrive
+        .withVelocityX(speeds[0] )// Drive forward with negative Y (forward)
+        .withVelocityY(speeds[1]) // Drive left with negative X (left)
+        .withRotationalRate(speeds[2]) ;// Drive counterclockwise with negative X (left);
+    }
 }

@@ -78,7 +78,7 @@ public class RobotContainer {
         // private SendableChooser<String> autoChooser;
         private SendableChooser<Command> autoChooser;
         // Create a telemetry logger for monitoring robot stats
-        private final Telemetry logger = new Telemetry(MaxSpeed);
+       // private final Telemetry logger = new Telemetry(MaxSpeed);
 
         // Joysticks for controlling the robot, one for driving and one for the button
         // board
