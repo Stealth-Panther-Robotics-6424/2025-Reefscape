@@ -13,16 +13,21 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
@@ -53,6 +58,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
+
+    private ShuffleboardTab DS_Drive = Shuffleboard.getTab("Drive");
+    private GenericEntry DS_PoseX = DS_Drive.add("PoseX", 0).getEntry();
+    private GenericEntry DS_PoseY = DS_Drive.add("PoseY", 0).getEntry();
+    private GenericEntry DS_PoseRot = DS_Drive.add("PoseRot", 0).getEntry();
 
     // PathPlanner configuration for autonomous driving
     RobotConfig config; // Holds PathPlanner robot configuration
@@ -224,6 +234,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      */
     @Override
     public void periodic() {
+
+        DS_PoseX.setDouble(this.getState().Pose.getX());
+        DS_PoseY.setDouble(this.getState().Pose.getY());
+        DS_PoseRot.setDouble(this.getState().Pose.getRotation().getDegrees());
         // Apply operator perspective if not already applied or if the robot is disabled
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent(allianceColor -> {
@@ -285,8 +299,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                                 .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
                                 .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())),
                 new PPHolonomicDriveController(
-                        new PIDConstants(10, 0, 0), // PID constants for translation
-                        new PIDConstants(7, 0, 0) // PID constants for rotation
+                        new PIDConstants(15, 0, 0), // PID constants for translation
+                        new PIDConstants(7.5, 0, 0) // PID constants for rotation
                 ),
                 config, // PathPlanner robot configuration
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red, // Flip path for Red alliance

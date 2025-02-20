@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
@@ -74,10 +75,10 @@ public class RobotContainer {
         private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
         /* Path follower for autonomous control */
-        private final SendableChooser<Command> autoChooser;
-
+        // private SendableChooser<String> autoChooser;
+        private SendableChooser<Command> autoChooser;
         // Create a telemetry logger for monitoring robot stats
-        // private final Telemetry logger = new Telemetry(MaxSpeed);
+        private final Telemetry logger = new Telemetry(MaxSpeed);
 
         // Joysticks for controlling the robot, one for driving and one for the button
         // board
@@ -119,20 +120,22 @@ public class RobotContainer {
         public RobotContainer() {
                 // Set up autonomous command chooser using PathPlanner
                 drivetrain = TunerConstants.createDrivetrain();
-             
+
                 // selector on the dashboard
 
                 // Define and register commands for the intake subsystem with different
                 // behaviors
 
-           
                 configureBindings(); // Configure control bindings for robot functions
 
-                NamedCommands.registerCommand("IntakeCoral", endEffector.manualIntake().withTimeout(3));
-                NamedCommands.registerCommand("StopIntake", endEffector.manualIntake().withTimeout(0.1));
-                NamedCommands.registerCommand("SpitCoral", endEffector.manualIntake().withTimeout(3));
+                NamedCommands.registerCommand("Intake Coral", endEffector.IntakeCoral().withTimeout(3));
+                NamedCommands.registerCommand("Stop Intake", endEffector.nothing().withTimeout(0.1));
+                NamedCommands.registerCommand("Shoot Coral", endEffector.shootCoral().withTimeout(3));
 
+                // autoChooser = new SendableChooser<String>();
+                // autoChooser.addOption("test auto", "test auto");
                 autoChooser = AutoBuilder.buildAutoChooser();
+
                 SmartDashboard.putData("Auto Mode", autoChooser); // Display auto mode
         }
 
@@ -231,7 +234,7 @@ public class RobotContainer {
 
                 algeaModeEnabled.negate().and(buttonbord.button(5)).whileTrue(endEffector.IntakeCoral());
                 // When algea mode is diabled and button 5 is hit Intake coral manually
-                algeaModeEnabled.negate().and(buttonbord.button(2)).whileTrue(endEffector.manualIntake());
+                algeaModeEnabled.negate().and(buttonbord.button(2)).whileTrue(endEffector.shootCoral());
                 // When algea mode is diabled and button 2 is hit shoot coral
                 algeaModeEnabled.negate().and(buttonbord.button(3)).whileTrue(endEffector.manualBackFeed());
                 // When algea mode is diabled and button 3 is hit backfeed coral
@@ -348,6 +351,7 @@ public class RobotContainer {
         // Autonomous command that is selected based on the chosen auto mode
         public Command getAutonomousCommand() {
                 /* Run the path selected from the auto chooser */
+                // return new PathPlannerAuto(autoChooser.getSelected());
                 return autoChooser.getSelected();
         }
 }

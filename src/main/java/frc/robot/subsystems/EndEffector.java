@@ -146,7 +146,7 @@ public class EndEffector extends SubsystemBase {
   // Usage of the reusable method with original names and casing
   // Command to manually run the intake system in the forward direction (intake
   // mode)
-  public Command manualIntake() {
+  public Command shootCoral() {
     return createIntakeCommand(1);
   }
 

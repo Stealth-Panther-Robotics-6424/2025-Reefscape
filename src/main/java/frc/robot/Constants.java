@@ -16,7 +16,7 @@ package frc.robot;
  */
 public final class Constants {
 
-  public static final String codeVersion = "Sprint 4.0";
+  public static final String codeVersion = "Sprint 6.0";
 
   /**
    * The OperatorConstants class holds constants related to the operator
