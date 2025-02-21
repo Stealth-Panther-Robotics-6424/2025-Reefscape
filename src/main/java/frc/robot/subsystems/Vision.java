@@ -8,6 +8,7 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
@@ -31,16 +32,18 @@ public class Vision extends SubsystemBase {
   }
 
   public void updatePoseEstimate(CommandSwerveDrivetrain drivetrain) {
-    LimelightHelpers.PoseEstimate aftpose = LimelightHelpers.getBotPoseEstimate_wpiBlue("aftlime");
+    double[] aftpose = NetworkTableInstance.getDefault().getTable("aftlime").getEntry("botpose_wpiblue")
+        .getDoubleArray(new double[6]);
     LimelightHelpers.PoseEstimate bowpose = bowLL.getVisionPose();
-    if (aftpose != null) {
+    if (aftpose[3] > 0) {
       SmartDashboard.putBoolean("else", false);
-      SmartDashboard.putNumber("aftPosX", aftpose.pose.getX());
-      SmartDashboard.putNumber("aftPosY", aftpose.pose.getY());
-      if (aftpose.rawFiducials[0].ambiguity < 0.7) {
+      SmartDashboard.putNumber("aftPosX", aftpose[0]);
+
+      if (aftpose[0] < 0.7) {
         {
 
-          drivetrain.addVisionMeasurement(aftpose.pose, aftpose.timestampSeconds, VecBuilder.fill(0.1, 0.1, 0.1));
+          // drivetrain.addVisionMeasurement(aftpose.pose, aftpose.timestampSeconds,
+          // VecBuilder.fill(0.1, 0.1, 0.1));
 
         }
       } else {
