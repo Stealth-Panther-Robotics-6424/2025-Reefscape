@@ -45,26 +45,34 @@ public class Elevator extends SubsystemBase {
 
   // Setup Shuffleboard (WPILib's dashboard) for real-time monitoring of the
   // elevator state during the match.
-  private ShuffleboardTab DS_ElevatorTab = Shuffleboard.getTab("Elevator");
-  private GenericEntry DS_ElevatorPosition = DS_ElevatorTab.add("ElevatorValue", 0).getEntry(); // Entry for elevator
-                                                                                                // position
-
-  private GenericEntry DS_ElevatorSpeed = DS_ElevatorTab.add("Elevator Speed", .2).getEntry(); // Entry for elevator
-                                                                                               // speed
-
-  private GenericEntry DS_forwardLimit = DS_ElevatorTab.add("Forward Limit", true).getEntry(); // Entry for forward
-                                                                                               // limit
-
-  private GenericEntry DS_reverseLimit = DS_ElevatorTab.add("Reverse Limit", true).getEntry(); // Entry for reverse
-                                                                                               // limit
-
-  private GenericEntry DS_canLift = DS_ElevatorTab.add("CanLift", true).getEntry(); // Entry for canLift
-
-  private GenericEntry DS_ElevatorSetpoint = DS_ElevatorTab.add("Setpoint", elevatorController.getSetpoint())
-      .getEntry();
+  /*
+   * private ShuffleboardTab DS_ElevatorTab = Shuffleboard.getTab("Elevator");
+   * private GenericEntry DS_ElevatorPosition =
+   * DS_ElevatorTab.add("ElevatorValue", 0).getEntry(); // Entry for elevator
+   * // position
+   * 
+   * private GenericEntry DS_ElevatorSpeed = DS_ElevatorTab.add("Elevator Speed",
+   * .2).getEntry(); // Entry for elevator
+   * // speed
+   * 
+   * private GenericEntry DS_forwardLimit = DS_ElevatorTab.add("Forward Limit",
+   * true).getEntry(); // Entry for forward
+   * // limit
+   * 
+   * private GenericEntry DS_reverseLimit = DS_ElevatorTab.add("Reverse Limit",
+   * true).getEntry(); // Entry for reverse
+   * // limit
+   * 
+   * private GenericEntry DS_canLift = DS_ElevatorTab.add("CanLift",
+   * true).getEntry(); // Entry for canLift
+   * 
+   * private GenericEntry DS_ElevatorSetpoint = DS_ElevatorTab.add("Setpoint",
+   * elevatorController.getSetpoint())
+   * .getEntry();
+   */
 
   // Default max elevator speed as defined by Shuffleboard.
-  double maxElevatorSpeed = this.DS_ElevatorSpeed.getDouble(0.2);
+  // double maxElevatorSpeed = this.DS_ElevatorSpeed.getDouble(0.2);
 
   public Elevator() {
     // Set both motor controllers to Coast mode to stop the motors from coasting
@@ -336,18 +344,21 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
 
     // Update the maximum speed value from Shuffleboard.
-    this.maxElevatorSpeed = this.DS_ElevatorSpeed.getDouble(0.2);
-
-    // Update the current position of the elevator.
-    this.DS_ElevatorPosition.setDouble(getElevatorPosition());
-
-    // Update the current status of the forward and reverse limit switches.
-    this.DS_forwardLimit.setDouble((this.elevatorTalonStrb.getForwardLimit().getValueAsDouble()));
-    this.DS_reverseLimit.setDouble(this.elevatorTalonStrb.getReverseLimit().getValueAsDouble());
-    this.DS_ElevatorSetpoint.setDouble(elevatorController.getSetpoint());
-    this.DS_canLift.setBoolean(this.canLift);
-    SmartDashboard.putData(CommandScheduler.getInstance());
-    // The periodic method is called to regularly update the robot's status.
-  }
+    /*
+     * this.maxElevatorSpeed = this.DS_ElevatorSpeed.getDouble(0.2);
+     * 
+     * // Update the current position of the elevator.
+     * this.DS_ElevatorPosition.setDouble(getElevatorPosition());
+     * 
+     * // Update the current status of the forward and reverse limit switches.
+     * this.DS_forwardLimit.setDouble((this.elevatorTalonStrb.getForwardLimit().
+     * getValueAsDouble()));
+     * this.DS_reverseLimit.setDouble(this.elevatorTalonStrb.getReverseLimit().
+     * getValueAsDouble());
+     * this.DS_ElevatorSetpoint.setDouble(elevatorController.getSetpoint());
+     * this.DS_canLift.setBoolean(this.canLift);
+     * SmartDashboard.putData(CommandScheduler.getInstance());
+     * // The periodic method is called to regularly update the robot's status.
+     */}
 
 }

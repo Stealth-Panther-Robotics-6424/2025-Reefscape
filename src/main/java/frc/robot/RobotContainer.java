@@ -36,13 +36,14 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
+import frc.robot.command.UpdateLocalizationWithVision;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Wrist;
 import frc.robot.subsystems.EndEffector;
+import frc.robot.subsystems.Vision;
 
 @SuppressWarnings("unused")
 public class RobotContainer {
@@ -78,7 +79,7 @@ public class RobotContainer {
         // private SendableChooser<String> autoChooser;
         private SendableChooser<Command> autoChooser;
         // Create a telemetry logger for monitoring robot stats
-       // private final Telemetry logger = new Telemetry(MaxSpeed);
+        // private final Telemetry logger = new Telemetry(MaxSpeed);
 
         // Joysticks for controlling the robot, one for driving and one for the button
         // board
@@ -88,6 +89,7 @@ public class RobotContainer {
         private final Elevator elevator = new Elevator(); // Elevator subsystem for vertical movements
         private final EndEffector endEffector = new EndEffector(); // Intake subsystem for grabbing objects
         private final Climber climber = new Climber(); // Intake subsystem for grabbing objects
+        private final Vision vision = new Vision(); // Intake subsystem for grabbing objects
 
         private boolean AlgeaMode = false;
 
@@ -153,6 +155,8 @@ public class RobotContainer {
         private void configureBindings() {
 
                 buttonbord.button(8).onTrue(Commands.runOnce(() -> this.AlgeaMode = !this.AlgeaMode));
+
+                vision.setDefaultCommand(new UpdateLocalizationWithVision(vision, drivetrain));
 
                 // Drivetrain control for swerve drive based on joystick input
                 drivetrain.setDefaultCommand(

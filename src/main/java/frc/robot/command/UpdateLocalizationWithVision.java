@@ -4,13 +4,16 @@
 
 package frc.robot.command;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Vision;
+import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class UpdateLocalizationWithVision extends Command {
-  private final Vision vision;  
+  private final Vision vision;
   private final CommandSwerveDrivetrain drivetrain;
 
   /** Creates a new UpdateLocalizationWithVision. */
@@ -18,21 +21,45 @@ public class UpdateLocalizationWithVision extends Command {
     this.vision = vision;
     this.drivetrain = drivetrain;
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(vision);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    vision.updatePoseEstimate(drivetrain);
+
+    LimelightHelpers.PoseEstimate aftpose = vision.aftLL.getVisionPose();
+    LimelightHelpers.PoseEstimate bowpose = vision.bowLL.getVisionPose();
+    if (aftpose != null) {
+      SmartDashboard.putBoolean("else", false);
+      SmartDashboard.putNumber("aftPosX", aftpose.pose.getX());
+      SmartDashboard.putNumber("aftPosY", aftpose.pose.getY());
+      if (aftpose.rawFiducials[0].ambiguity < 0.7) {
+        {
+
+          drivetrain.addVisionMeasurement(aftpose.pose, aftpose.timestampSeconds, VecBuilder.fill(0.1, 0.1, 0.1));
+
+        }
+      } else {
+        SmartDashboard.putBoolean("else", true);
+      }
+    }
+    if (bowpose != null) {
+      if (bowpose.rawFiducials[0].ambiguity < 0.7) {
+        drivetrain.addVisionMeasurement(bowpose.pose, bowpose.timestampSeconds, VecBuilder.fill(0.1, 0.1, 0.1));
+      }
+    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+  }
 
   // Returns true when the command should end.
   @Override

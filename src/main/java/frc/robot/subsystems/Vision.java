@@ -4,35 +4,54 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 
 public class Vision extends SubsystemBase {
-  private final LimelightSubsystem bowLL = new LimelightSubsystem("bowLimelight");
-  private final LimelightSubsystem aftLL= new LimelightSubsystem("aftLimelight");
-  
+  public final LimelightSubsystem bowLL = new LimelightSubsystem("bowlime");
+  public final LimelightSubsystem aftLL = new LimelightSubsystem("aftlime");
+
   /** Creates a new Vision. */
-  public Vision() {}
+  public Vision() {
+
+    LimelightHelpers.setCameraPose_RobotSpace("bowlime", 0.3210213798,
+        0.2041934194, 0.2244396832, 0.618624, 15.61692, 3.312392);
+    LimelightHelpers.setCameraPose_RobotSpace("aftlime", 0.1171411424, 0, 0.9671403314, 0, 22, 180);
+
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }
-  public void updatePoseEstimate(CommandSwerveDrivetrain drivetrain){
-    LimelightHelpers.PoseEstimate aftpose = aftLL.getVisionPose();
+
+  public void updatePoseEstimate(CommandSwerveDrivetrain drivetrain) {
+    LimelightHelpers.PoseEstimate aftpose = LimelightHelpers.getBotPoseEstimate_wpiBlue("aftlime");
     LimelightHelpers.PoseEstimate bowpose = bowLL.getVisionPose();
-    if (aftpose.rawFiducials[0].ambiguity<0.7&&aftpose.rawFiducials.length>0){ {
-      
-      drivetrain.addVisionMeasurement(aftpose.pose,aftpose.timestampSeconds);
+    if (aftpose != null) {
+      SmartDashboard.putBoolean("else", false);
+      SmartDashboard.putNumber("aftPosX", aftpose.pose.getX());
+      SmartDashboard.putNumber("aftPosY", aftpose.pose.getY());
+      if (aftpose.rawFiducials[0].ambiguity < 0.7) {
+        {
+
+          drivetrain.addVisionMeasurement(aftpose.pose, aftpose.timestampSeconds, VecBuilder.fill(0.1, 0.1, 0.1));
+
+        }
+      } else {
+        SmartDashboard.putBoolean("else", true);
+      }
     }
-    if (bowpose.rawFiducials[0].ambiguity<0.7&&bowpose.rawFiducials.length>0){
-      drivetrain.addVisionMeasurement(bowpose.pose,bowpose.timestampSeconds);
+    if (bowpose != null) {
+      if (bowpose.rawFiducials[0].ambiguity < 0.7) {
+        drivetrain.addVisionMeasurement(bowpose.pose, bowpose.timestampSeconds, VecBuilder.fill(0.1, 0.1, 0.1));
+      }
     }
-    
+
   }
-
-
-
-  
-}
 }
