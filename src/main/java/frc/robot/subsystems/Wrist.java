@@ -59,7 +59,7 @@ public class Wrist extends SubsystemBase {
   boolean safeFold = false;
   double MotorPower = 0;
   // Shuffleboard setup to display wrist data for debugging and tuning
-  private final PIDController wristController = new PIDController(3, 0, 0);
+  private final PIDController wristController = new PIDController(6, 0, 0);
   // PID controller to maintain wrist position by calculating the appropriate
   // motor output
   /*

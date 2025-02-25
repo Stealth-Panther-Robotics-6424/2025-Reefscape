@@ -37,6 +37,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.command.UpdateLocalizationWithVision;
+import frc.robot.command.MergeVisionOdometryCommand;
+
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -156,7 +158,7 @@ public class RobotContainer {
 
                 buttonbord.button(8).onTrue(Commands.runOnce(() -> this.AlgeaMode = !this.AlgeaMode));
 
-                vision.setDefaultCommand(new UpdateLocalizationWithVision(vision, drivetrain));
+                vision.setDefaultCommand(new MergeVisionOdometryCommand(vision, drivetrain));
 
                 // Drivetrain control for swerve drive based on joystick input
                 drivetrain.setDefaultCommand(
