@@ -20,6 +20,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.events.EventTrigger;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
@@ -87,11 +88,11 @@ public class RobotContainer {
         // board
         private final CommandJoystick joystick = new CommandJoystick(0); // My joystick
         private final CommandJoystick buttonbord = new CommandJoystick(1); // Buttonboard joystick
-        private final Wrist wrist = new Wrist(); // Wrist subsystem for arm control
-        private final Elevator elevator = new Elevator(); // Elevator subsystem for vertical movements
-        private final EndEffector endEffector = new EndEffector(); // Intake subsystem for grabbing objects
-        private final Climber climber = new Climber(); // Intake subsystem for grabbing objects
-        private final Vision vision = new Vision(); // Intake subsystem for grabbing objects
+        private final Wrist wrist; // Wrist subsystem for arm control
+        private final Elevator elevator; // Elevator subsystem for vertical movements
+        private final EndEffector endEffector; // Intake subsystem for grabbing objects
+        private final Climber climber; // Intake subsystem for grabbing objects
+        private final Vision vision; // Intake subsystem for grabbing objects
 
         private boolean AlgeaMode = false;
 
@@ -99,13 +100,13 @@ public class RobotContainer {
         public final CommandSwerveDrivetrain drivetrain;
 
         // Define triggers for controlling wrist and elevator limits
-        private final Trigger wristLimiter = wrist.wristLimiter();
-        private final Trigger canFold = elevator.canFold();
-        private final Trigger wristIntake = wrist.wristIntake();
-        private final Trigger elevatorIntake = elevator.elevatorIntake();
-        private final Trigger isEnabled = new Trigger(() -> DriverStation.isEnabled());
-        private final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
-        private final Trigger algeaModeEnabled = new Trigger(() -> getAlgeaMode());
+        private final Trigger wristLimiter;
+        private final Trigger canFold;
+        private final Trigger wristIntake;
+        private final Trigger elevatorIntake;
+        private final Trigger isEnabled;
+        private final Trigger isDisabled;
+        private final Trigger algeaModeEnabled;
 
         /* Some triggers related to elevator throttles (to be developed in Sprint 4) */
         /*
@@ -124,6 +125,19 @@ public class RobotContainer {
         public RobotContainer() {
                 // Set up autonomous command chooser using PathPlanner
                 drivetrain = TunerConstants.createDrivetrain();
+                wrist = new Wrist();
+                elevator = new Elevator(); // Elevator subsystem for vertical movements
+                endEffector = new EndEffector(); // Intake subsystem for grabbing objects
+                climber = new Climber(); // Intake subsystem for grabbing objects
+                vision = new Vision();
+
+                wristLimiter = wrist.wristLimiter();
+                canFold = elevator.canFold();
+                wristIntake = wrist.wristIntake();
+                elevatorIntake = elevator.elevatorIntake();
+                isEnabled = new Trigger(() -> DriverStation.isEnabled());
+                isDisabled = new Trigger(() -> DriverStation.isDisabled());
+                algeaModeEnabled = new Trigger(() -> getAlgeaMode());
 
                 // selector on the dashboard
 
@@ -135,6 +149,25 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Intake Coral", endEffector.IntakeCoral().withTimeout(3));
                 NamedCommands.registerCommand("Stop Intake", endEffector.nothing().withTimeout(0.1));
                 NamedCommands.registerCommand("Shoot Coral", endEffector.shootCoral().withTimeout(3));
+
+                new EventTrigger("L4").onTrue((Commands.sequence(wrist.WristSafety(
+                                () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
+                                wrist.WristL4(() -> canFold.getAsBoolean()))));
+
+                /*
+                 * NamedCommands.registerCommand("Wrist Safety", wrist.WristSafety(canFold));
+                 * NamedCommands.registerCommand("L4 Elevator",
+                 * elevator.ElevatorL4(wristLimiter));
+                 * NamedCommands.registerCommand("L4 Wrist", wrist.WristL4(canFold));
+                 * 
+                 * 
+                 * NamedCommands.registerCommand("L4 Command",
+                 * (Commands.sequence(wrist.WristSafety(
+                 * () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
+                 * wrist.WristL4(() -> canFold.getAsBoolean()))));
+                 * 
+                 * 
+                 */
 
                 // autoChooser = new SendableChooser<String>();
                 // autoChooser.addOption("test auto", "test auto");
