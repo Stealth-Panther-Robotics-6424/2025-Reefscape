@@ -250,9 +250,12 @@ public class Wrist extends SubsystemBase {
         () -> {
           this.safeFold = canFold.getAsBoolean();
           this.executeWristPID();
+          
 
         },
         interrupted -> {
+          this.setWristMotor(0
+          );
         }, // Interrupted: No specific action when interrupted
         () -> this.wristAtSetpoint(), // Finish condition: Check if wrist has reached L1 position
         this);
