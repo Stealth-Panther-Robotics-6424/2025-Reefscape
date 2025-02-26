@@ -181,8 +181,8 @@ public class Elevator extends SubsystemBase {
 
   public Trigger canFold() { // this method sets whether the wrist can fold back based on the elevator
                              // position this prevents folding back into the crossmembers
-    return new Trigger(() -> !((this.getElevatorPosition() >= 26) && (this.getElevatorPosition() <= 50.5)
-        || (this.getElevatorPosition() >= 59.0) && (this.getElevatorPosition() <= 104)));
+    return new Trigger(() -> (!((this.getElevatorPosition() >= 26) && (this.getElevatorPosition() <= 50.5))
+        || !((this.getElevatorPosition() >= 59.0) && (this.getElevatorPosition() <= 104))));
 
   }
 
