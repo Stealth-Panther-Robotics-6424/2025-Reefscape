@@ -250,6 +250,7 @@ public class Wrist extends SubsystemBase {
         () -> {
           this.safeFold = canFold.getAsBoolean();
           this.executeWristPID();
+          
 
         },
         interrupted -> {

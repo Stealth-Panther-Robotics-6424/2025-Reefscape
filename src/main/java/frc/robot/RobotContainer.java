@@ -149,10 +149,14 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Intake Coral", endEffector.IntakeCoral().withTimeout(3));
                 NamedCommands.registerCommand("Stop Intake", endEffector.nothing().withTimeout(0.1));
                 NamedCommands.registerCommand("Shoot Coral", endEffector.shootCoral().withTimeout(3));
+               
 
                 new EventTrigger("L4").onTrue((Commands.sequence(wrist.WristSafety(
                                 () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
                                 wrist.WristL4(() -> canFold.getAsBoolean()))));
+                new EventTrigger("L1").onTrue(Commands.sequence(wrist.WristSafety(
+                        () -> canFold.getAsBoolean()), elevator.ElevatorL1(wristLimiter),
+                        wrist.WristL1(() -> canFold.getAsBoolean())));               
 
                 /*
                  * NamedCommands.registerCommand("Wrist Safety", wrist.WristSafety(canFold));
