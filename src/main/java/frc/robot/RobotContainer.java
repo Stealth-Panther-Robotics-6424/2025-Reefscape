@@ -27,6 +27,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -35,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.command.UpdateLocalizationWithVision;
@@ -269,6 +271,7 @@ public class RobotContainer {
                 endEffector.setDefaultCommand(endEffector.nothing()); // Default is do nothing
                 // Coral Commands
                 algeaModeEnabled.negate().and(elevator.elevatorIntake().and(wrist.wristIntake()))
+                                .and(() -> RobotState.isTeleop())
                                 .whileTrue(endEffector.IntakeCoral());// When algea mode is disabled and the elevator
                                                                       // and wrist are in the L1 position
 

@@ -3,44 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2952460106382977,
-        "y": 6.988896276595744
-      },
-      "prevControl": null,
-      "nextControl": {
-        "x": 2.0528713694005094,
-        "y": 6.477815507500335
-      },
-      "isLocked": false,
-      "linkedName": "End Of First Intake"
-    },
-    {
-      "anchor": {
         "x": 3.1745580808080813,
         "y": 4.167297979797979
       },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.249621212121212,
+        "y": 4.197790404040403
+      },
+      "isLocked": false,
+      "linkedName": "end of 2P"
+    },
+    {
+      "anchor": {
+        "x": 2.320770202020202,
+        "y": 4.167297979797979
+      },
       "prevControl": {
-        "x": 1.9429798065297892,
-        "y": 4.4274124162237385
+        "x": 2.707007575757576,
+        "y": 4.1469696969696965
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "end of 2P"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "L4",
-      "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
+    "maxVelocity": 1.0,
     "maxAcceleration": 1.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -55,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -53.32565033042686
+    "rotation": 0.0
   },
   "useDefaultConstraints": false
 }

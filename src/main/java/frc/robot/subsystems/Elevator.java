@@ -186,6 +186,19 @@ public class Elevator extends SubsystemBase {
 
   }
 
+  public void checkLimitAndReset() // Check if the built-in reverse limit switch is triggered
+  {
+    if (elevatorTalonStrb.getReverseLimit().getValueAsDouble() == 1) {
+      if (this.getElevatorPosition() != 0) {
+        elevatorTalonStrb.setPosition(0);
+        elevatorTalonPort.setPosition(0); // Reset the value to zero
+        System.out.println("Limit switch activated, resetting value to zero");
+
+      }
+      ;
+    }
+  }
+
   // Method to calculate and apply the PID output to move the elevator towards the
   // setpoint.
   public void executeElevatorPID() {
@@ -342,6 +355,8 @@ public class Elevator extends SubsystemBase {
   // Shuffleboard for monitoring.
   @Override
   public void periodic() {
+
+    // checkLimitAndReset();
 
     // Update the maximum speed value from Shuffleboard.
     /*
