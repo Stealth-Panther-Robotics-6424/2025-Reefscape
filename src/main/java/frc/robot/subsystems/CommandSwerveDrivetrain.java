@@ -14,7 +14,11 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.GenericEntry;
@@ -24,11 +28,21 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.geometry.Rotation3d;
 
 /**
  * This class extends the Phoenix 6 SwerveDrivetrain class and implements the
@@ -318,10 +332,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param targetPose  (meters and radians) target visionpose of the robot in robot to target space  
      * @return output array of doubles range -1 to 1  to feed into a swerve request fusing joystick control and P loop control
     */
-    public double[] driveToPose(double xAxis, double yAxis, double rotAxis,Pose2d pose, Pose2d targetPose) {
-        double dx = targetPose.getX()- pose.getX()-xAxis*0.5;// find the error in distance  in meters for  x and then add a joystick adjustment to the distance to fine adjust 
-        double dy = targetPose.getY()- pose.getY()-yAxis*0.5;   // find the error in distance in meters  for y and then add a joystick adjustment to the distance to fine adjust
-        double dtheta = targetPose.getRotation().getRadians()- pose.getRotation().getRadians()-rotAxis*0.5; // find the error in angel in radians for theta and then add a joystick adjustment to the angle to fine adjust
+    public double[] driveToPose(double xAxis, double yAxis, double rotAxis,Pose2d pose, Pose3d targetPose) {
+        double dx = targetPose.getX()- pose.getX()-xAxis*0.25;// find the error in distance  in meters for  x and then add a joystick adjustment to the distance to fine adjust 
+        double dy = targetPose.getY()- pose.getY()-yAxis*0.25;   // find the error in distance in meters  for y and then add a joystick adjustment to the distance to fine adjust
+        double dtheta = targetPose.getRotation().getZ()- pose.getRotation().getRadians()-rotAxis*0.5; // find the error in angel in radians for theta and then add a joystick adjustment to the angle to fine adjust
 
         // P control for x, y, and theta hard coded to allow for easier use
         double xSpeed = dx * 0.1;
@@ -356,14 +370,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param robotCentricDrive robot-centric drive mode for alignment
      * @return
      */
-    public SwerveRequest allignToTag(double xAxis, double yAxis, double rotAxis,Pose2d robotToTargetPose, Pose2d targetBotToOffestPose,SwerveRequest.RobotCentric robotCentricDrive) {
-        double[] speeds = driveToPose(xAxis, yAxis, rotAxis,robotToTargetPose, targetBotToOffestPose);
-
-        return  robotCentricDrive
-        .withVelocityX(speeds[0] )// Drive forward with negative Y (forward)
-        .withVelocityY(speeds[1]) // Drive left with negative X (left)
-        .withRotationalRate(speeds[2]) ;// Drive counterclockwise with negative X (left);
-    }
+    //public SwerveRequest allignToTag(double xAxis, double yAxis, double rotAxis,Pose2d robotToTargetPose, Pose2d targetBotToOffestPose,SwerveRequest.RobotCentric robotCentricDrive) {
+    //   double[] speeds = driveToPose(xAxis, yAxis, rotAxis,robotToTargetPose, targetBotToOffestPose);
+    //
+    //    return  robotCentricDrive
+    //    .withVelocityX(speeds[0] )// Drive forward with negative Y (forward)
+    //    .withVelocityY(speeds[1]) // Drive left with negative X (left)
+    //    .withRotationalRate(speeds[2]) ;// Drive counterclockwise with negative X (left);
+    //}
 
      /**
      * Aligns the robot to the left of Tag 21 on the field  vision target based on the robot's current pose and  uses the joystick values to adjust the P setpoint to account for variation.
@@ -375,10 +389,62 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param robotCentricDrive robot-centric drive mode for alignment
      * @return
      */
-    public SwerveRequest allignToTag21Left(double xAxis, double yAxis, double rotAxis,SwerveRequest.FieldCentric fieldCentricCentricDrive) {
-        double[] speeds = driveToPose(xAxis, yAxis, rotAxis,getState().Pose,new Pose2d(5.84,3.845,new Rotation2d(174)));
+    //public SwerveRequest allignToTag21Left(double xAxis, double yAxis, double rotAxis,SwerveRequest.FieldCentric fieldCentricCentricDrive) {
+    //    double[] speeds = driveToPose(xAxis, yAxis, rotAxis,getState().Pose,new Pose2d(5.84,3.845,new Rotation2d(174)));
+    //
+    //    return  fieldCentricCentricDrive
+    //    .withVelocityX(speeds[0] )// Drive forward with negative Y (forward)
+    //    .withVelocityY(speeds[1]) // Drive left with negative X (left)
+    //    .withRotationalRate(speeds[2]) ;// Drive counterclockwise with negative X (left);
+    //}
 
-        return  fieldCentricCentricDrive
+
+    /**method to take read a tags global pose and rotationand 
+   * then give and offest 6in left or right  and 2 feet away depending on a buttorn of the tag when facing it
+   * 
+   * @param int TagID   
+   * @return Pose3d pose
+   * 
+   */
+    public Pose3d targetpose(int TagID,boolean left){
+    Pose3d tagpose = Constants.VisionConstants.m_aprilTagFieldLayout.getTagPose(TagID).get();
+    Pose3d pose = new Pose3d();
+    if(left){
+        pose = tagpose.transformBy(new Transform3d(new Translation3d(Units.feetToMeters(2), Units.inchesToMeters(-6), 0), new Rotation3d(0, 0, 0)));
+    }else{
+        pose = tagpose.transformBy(new Transform3d(new Translation3d(Units.feetToMeters(2), Units.inchesToMeters(6), 0), new Rotation3d(0, 0, 0)));
+    }
+
+    //SmartDashboard.putNumber("output X ", pose.getX());
+    //SmartDashboard.putNumber("output Y ", pose.getY());
+    //SmartDashboard.putNumber("output Z ", pose.getZ());
+    //SmartDashboard.putNumber("output Roll ", pose.getRotation().getX());
+    //SmartDashboard.putNumber("output Pitch ", pose.getRotation().getY());
+    //SmartDashboard.putNumber("output Yaw ", pose.getRotation().getZ());
+    return pose;
+   }
+    /**
+     * Aligns the robot to a vision target based on the robot's current pose and the adjusted joystick values.
+     * @param xAxis x-axis of joystick for fine adjustment
+     * @param yAxis y-axis of joystick for fine adjustment
+     * @param rotAxis   rotation axis of joystick for fine adjustment
+     * @param pose current visionpose of the robot in robot to target space
+     * @param targetPose    target visionpose of the robot in robot to target space
+     * @param robotCentricDrive robot-centric drive mode for alignment
+     * @return
+     */
+    public SwerveRequest allignToClosestTagleft(int tag,double xAxis, double yAxis, double rotAxis,Pose2d robotToTargetPose,SwerveRequest.RobotCentric robotCentricDrive) {
+        double[] speeds = driveToPose(xAxis, yAxis, rotAxis,robotToTargetPose, targetpose(tag,true));
+
+        return  robotCentricDrive
+        .withVelocityX(speeds[0] )// Drive forward with negative Y (forward)
+        .withVelocityY(speeds[1]) // Drive left with negative X (left)
+        .withRotationalRate(speeds[2]) ;// Drive counterclockwise with negative X (left);
+    }
+    public SwerveRequest allignToClosestTagright(int tag,double xAxis, double yAxis, double rotAxis,Pose2d robotToTargetPose,SwerveRequest.RobotCentric robotCentricDrive) {
+        double[] speeds = driveToPose(xAxis, yAxis, rotAxis,robotToTargetPose, targetpose(tag,false));
+
+        return  robotCentricDrive
         .withVelocityX(speeds[0] )// Drive forward with negative Y (forward)
         .withVelocityY(speeds[1]) // Drive left with negative X (left)
         .withRotationalRate(speeds[2]) ;// Drive counterclockwise with negative X (left);

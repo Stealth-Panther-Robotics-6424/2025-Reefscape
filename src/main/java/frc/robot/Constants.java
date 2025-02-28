@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
  * numerical or boolean constants. These constants are used across different
@@ -25,6 +28,15 @@ public final class Constants {
   public static class OperatorConstants {
     // Port for the driver controller (gamepad or joystick) connected to the robot
     public static final int kDriverControllerPort = 0;
+  }
+  public static class VisionConstants {
+    // Constants related to vision processing and camera settings
+    public static final double kCameraHeight = 0.0; // Height of the camera from the ground
+    public static final double kTargetHeight = 0.0; // Height of the target from the ground
+    public static final double kCameraAngle = 0.0; // Angle of the camera from the ground
+    public static final AprilTagFieldLayout m_aprilTagFieldLayout = AprilTagFields.k2025ReefscapeWelded.loadAprilTagLayoutField();
+  
+    
   }
 
   /**
