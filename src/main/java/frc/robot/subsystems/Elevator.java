@@ -40,36 +40,34 @@ public class Elevator extends SubsystemBase {
 
   // Create a PID controller to control the elevator position, with initial PID
   // values (Proportional, Integral, Derivative).
-  private final PIDController elevatorController = new PIDController(0.08, 0, 0); // The OG value was 0.0002348, but it
+  private final PIDController elevatorController = new PIDController(0.06, 0, 0); // The OG value was 0.0002348, but it
                                                                                   // has been adjusted
 
   // Setup Shuffleboard (WPILib's dashboard) for real-time monitoring of the
   // elevator state during the match.
-  /*
-   * private ShuffleboardTab DS_ElevatorTab = Shuffleboard.getTab("Elevator");
-   * private GenericEntry DS_ElevatorPosition =
-   * DS_ElevatorTab.add("ElevatorValue", 0).getEntry(); // Entry for elevator
-   * // position
-   * 
-   * private GenericEntry DS_ElevatorSpeed = DS_ElevatorTab.add("Elevator Speed",
-   * .2).getEntry(); // Entry for elevator
-   * // speed
-   * 
-   * private GenericEntry DS_forwardLimit = DS_ElevatorTab.add("Forward Limit",
-   * true).getEntry(); // Entry for forward
-   * // limit
-   * 
-   * private GenericEntry DS_reverseLimit = DS_ElevatorTab.add("Reverse Limit",
-   * true).getEntry(); // Entry for reverse
-   * // limit
-   * 
-   * private GenericEntry DS_canLift = DS_ElevatorTab.add("CanLift",
-   * true).getEntry(); // Entry for canLift
-   * 
-   * private GenericEntry DS_ElevatorSetpoint = DS_ElevatorTab.add("Setpoint",
-   * elevatorController.getSetpoint())
-   * .getEntry();
-   */
+
+  private ShuffleboardTab DS_ElevatorTab = Shuffleboard.getTab("Elevator");
+  private GenericEntry DS_ElevatorPosition = DS_ElevatorTab.add("ElevatorValue", 0).getEntry(); // Entry for elevator
+  // position
+
+  private GenericEntry DS_ElevatorSpeed = DS_ElevatorTab.add("Elevator Speed",
+      .2).getEntry(); // Entry for elevator
+  // speed
+
+  private GenericEntry DS_forwardLimit = DS_ElevatorTab.add("Forward Limit",
+      true).getEntry(); // Entry for forward
+  // limit
+
+  private GenericEntry DS_reverseLimit = DS_ElevatorTab.add("Reverse Limit",
+      true).getEntry(); // Entry for reverse
+  // limit
+
+  private GenericEntry DS_canLift = DS_ElevatorTab.add("CanLift",
+      true).getEntry(); // Entry for canLift
+
+  private GenericEntry DS_ElevatorSetpoint = DS_ElevatorTab.add("Setpoint",
+      elevatorController.getSetpoint())
+      .getEntry();
 
   // Default max elevator speed as defined by Shuffleboard.
   // double maxElevatorSpeed = this.DS_ElevatorSpeed.getDouble(0.2);
@@ -96,8 +94,9 @@ public class Elevator extends SubsystemBase {
 
     // Set initial PID controller setpoint to current elevator position.
     elevatorController.setSetpoint(getElevatorPosition());
-    elevatorController.setTolerance(1); // Set tolerance to 1 (tolerance defines when the PID controller considers the
-                                        // target reached)
+    elevatorController.setTolerance(0.67); // Set tolerance to 1 (tolerance defines when the PID controller considers
+    // the
+    // target reached)
     // elevatorTalonStrb.setPosition(0); // Possible initial position setting for
     // the second motor (commented out)
   }
@@ -110,7 +109,7 @@ public class Elevator extends SubsystemBase {
   // Trigger that checks if the elevator is in the correct position for intake
   // (position <= 1).
   public Trigger elevatorIntake() {
-    return new Trigger(() -> this.getElevatorPosition() <= 2);
+    return new Trigger(() -> this.getElevatorPosition() <= 1.14);
   }
 
   // Method to get the current position of the elevator by reading the position
@@ -132,7 +131,7 @@ public class Elevator extends SubsystemBase {
   // Method to set power to both elevator motors, considering limits.
   public void setElevatorMotor(double power) {
     double output = elevatorLimit(power);
-    double kFValue = 0.02;
+    double kFValue = 0.03;
     SmartDashboard.putNumber("LimitOutput", output); //
     // Apply limit on power to prevent the elevator from exceeding boundaries (e.g.,
     // going beyond the upper or lower limit).
@@ -151,9 +150,9 @@ public class Elevator extends SubsystemBase {
     // If the elevator can't lift or if the elevator is at the top or bottom, set
     // the output power to a small value.
     if ((!canLift)
-        || (elevatorTalonStrb.getPosition().getValueAsDouble() >= 115 && power > 0) // Positive Power makes the
+        || (elevatorTalonStrb.getPosition().getValueAsDouble() >= 65.71 && power > 0) // Positive Power makes the
         // robot go up negative makes the robot go down
-        || (elevatorTalonStrb.getPosition().getValueAsDouble() <= 0.5 && power < 0)) {
+        || (elevatorTalonStrb.getPosition().getValueAsDouble() <= 0.29 && power < 0)) {
 
       output = 0.0;
       // Output is zero but is given a kf value of .02 when it is applied to the motor
@@ -173,16 +172,20 @@ public class Elevator extends SubsystemBase {
   }
 
   public double elevatorThrottle() {
-    return ((1 - 0.5 * (this.getElevatorPosition() / 115))); // This method is used to slow the drivespeed down based on
-                                                             // the elevator position
-    // any slower than this wwill make slowmode not be able to be held down on the
-    // controller or the robot cannot move
+    return ((1 - 0.5 * (this.getElevatorPosition() / 65.71))); // This method is used to slow the drivespeed down based
+                                                               // on
+    // the elevator position
+    // any slower than this will make slowmode not be able to be held down on the
+    // controller or the robot cannot move (OG value for division problem 115 new
+    // value is 65.71)
   }
 
   public Trigger canFold() { // this method sets whether the wrist can fold back based on the elevator
                              // position this prevents folding back into the crossmembers
-    return new Trigger(() -> (!((this.getElevatorPosition() >= 26) && (this.getElevatorPosition() <= 50.5))
-        || !((this.getElevatorPosition() >= 59.0) && (this.getElevatorPosition() <= 104))));
+                             // Original values in order 26, 50.5, 59, 104
+                             // new values in order 14.86, 28.86, 33.71, 59.43
+    return new Trigger(() -> (!((this.getElevatorPosition() >= 14.86) && (this.getElevatorPosition() <= 28.86))
+        || !((this.getElevatorPosition() >= 33.71) && (this.getElevatorPosition() <= 59.43))));
 
   }
 
@@ -307,32 +310,32 @@ public class Elevator extends SubsystemBase {
 
   }
 
-  // Command to move the elevator to the L2 position (20)
+  // Command to move the elevator to the L2 position OG(20) New (11.43)
   public Command ElevatorL2(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 20);
+    return MovetoPosition(wristLimiter, 11.43);
   }
 
-  // Command to move the elevator to the L3 position (52.7).
+  // Command to move the elevator to the L3 position OG(52.7). New (30.11)
   public Command ElevatorL3(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 52.7);
+    return MovetoPosition(wristLimiter, 30.11);
   }
 
-  // Command to move the elevator to the L4 position (113.7).
+  // Command to move the elevator to the L4 position OG (113.7). New(64.97)
   public Command ElevatorL4(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 113.7);
+    return MovetoPosition(wristLimiter, 66);
   }
 
   public Command ElevatorA1(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 39); // original 35.17 V1 36 V2 37 V3 38
+    return MovetoPosition(wristLimiter, 22.29); // OG (39) New (22.29)
   }
 
   public Command ElevatorA2(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 71);
+    return MovetoPosition(wristLimiter, 40.57); // OG (71) New (40.57)
   }
 
   public Command ElevatorProcessor(BooleanSupplier wristLimiter) {
@@ -342,7 +345,7 @@ public class Elevator extends SubsystemBase {
 
   public Command ElevatorBarge(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 114.4);
+    return MovetoPosition(wristLimiter, 66); // OG (114.4) New (65.37)
   }
 
   // Command to exit the current elevator state and maintain its position.
@@ -359,21 +362,19 @@ public class Elevator extends SubsystemBase {
     // checkLimitAndReset();
 
     // Update the maximum speed value from Shuffleboard.
-    /*
-     * this.maxElevatorSpeed = this.DS_ElevatorSpeed.getDouble(0.2);
-     * 
-     * // Update the current position of the elevator.
-     * this.DS_ElevatorPosition.setDouble(getElevatorPosition());
-     * 
-     * // Update the current status of the forward and reverse limit switches.
-     * this.DS_forwardLimit.setDouble((this.elevatorTalonStrb.getForwardLimit().
-     * getValueAsDouble()));
-     * this.DS_reverseLimit.setDouble(this.elevatorTalonStrb.getReverseLimit().
-     * getValueAsDouble());
-     * this.DS_ElevatorSetpoint.setDouble(elevatorController.getSetpoint());
-     * this.DS_canLift.setBoolean(this.canLift);
-     * SmartDashboard.putData(CommandScheduler.getInstance());
-     * // The periodic method is called to regularly update the robot's status.
-     */}
+
+    // this.maxElevatorSpeed = this.DS_ElevatorSpeed.getDouble(0.2);
+
+    // Update the current position of the elevator.
+    this.DS_ElevatorPosition.setDouble(getElevatorPosition());
+
+    // Update the current status of the forward and reverse limit switches.
+    this.DS_forwardLimit.setDouble((this.elevatorTalonStrb.getForwardLimit().getValueAsDouble()));
+    this.DS_reverseLimit.setDouble(this.elevatorTalonStrb.getReverseLimit().getValueAsDouble());
+    this.DS_ElevatorSetpoint.setDouble(elevatorController.getSetpoint());
+    this.DS_canLift.setBoolean(this.canLift);
+    SmartDashboard.putData(CommandScheduler.getInstance());
+    // The periodic method is called to regularly update the robot's status.
+  }
 
 }

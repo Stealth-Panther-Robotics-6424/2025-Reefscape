@@ -148,9 +148,11 @@ public class RobotContainer {
 
                 configureBindings(); // Configure control bindings for robot functions
 
-                NamedCommands.registerCommand("Intake Coral", endEffector.IntakeCoral().withTimeout(2));
+                NamedCommands.registerCommand("Intake Coral", endEffector.IntakeCoral());
                 NamedCommands.registerCommand("Stop Intake", endEffector.nothing().withTimeout(0.1));
-                NamedCommands.registerCommand("Shoot Coral", endEffector.shootCoral().withTimeout(.5));
+                NamedCommands.registerCommand("Shoot Coral", endEffector.shootCoral().withTimeout(.25));
+                NamedCommands.registerCommand("Shoot Algea", endEffector.ShootAlgea().withTimeout(.25));
+                NamedCommands.registerCommand("Intake Algea", endEffector.IntakeAlgea());
 
                 new EventTrigger("L4").onTrue((Commands.sequence(wrist.WristSafety(
                                 () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
@@ -158,6 +160,9 @@ public class RobotContainer {
                 new EventTrigger("L1").onTrue(Commands.sequence(wrist.WristSafety(
                                 () -> canFold.getAsBoolean()), elevator.ElevatorL1(wristLimiter),
                                 wrist.WristL1(() -> canFold.getAsBoolean())));
+                new EventTrigger("A1").onTrue(Commands.sequence(wrist.WristSafety(
+                                () -> canFold.getAsBoolean()), elevator.ElevatorA1(wristLimiter),
+                                wrist.WristA1(() -> canFold.getAsBoolean())));
 
                 /*
                  * NamedCommands.registerCommand("Wrist Safety", wrist.WristSafety(canFold));

@@ -175,10 +175,10 @@ public class Climber extends SubsystemBase {
         }, // Initialize: No action needed
         () -> {
           if (forwards.getAsBoolean()) {
-            setClimberMotor(.85);
+            setClimberMotor(1);
 
           } else if (backwards.getAsBoolean()) {
-            setClimberMotor(-0.85);
+            setClimberMotor(-1);
 
           } else {
             setClimberMotor(0);

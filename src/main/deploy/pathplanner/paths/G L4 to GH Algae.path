@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2952460106382977,
-        "y": 6.988896276595744
+        "x": 5.8461103723404255,
+        "y": 3.838297872340425
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0528713694005094,
-        "y": 6.477815507500335
+        "x": 7.456416223404256,
+        "y": 3.931648936170212
       },
       "isLocked": false,
-      "linkedName": "End Of First Intake"
+      "linkedName": "Scored on G L4"
     },
     {
       "anchor": {
-        "x": 3.1745580808080813,
-        "y": 4.167297979797979
+        "x": 6.06781914893617,
+        "y": 3.978324468085106
       },
       "prevControl": {
-        "x": 1.9429798065297892,
-        "y": 4.4274124162237385
+        "x": 7.0480053191489365,
+        "y": 4.328390957446809
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "end of 2P"
+      "linkedName": "Sitting at GH Algae"
     }
   ],
   "rotationTargets": [],
@@ -33,15 +33,15 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "L4",
-      "waypointRelativePos": 0.0,
+      "name": "A1",
+      "waypointRelativePos": 0.16783216783216795,
       "endWaypointRelativePos": null,
       "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 1.5,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -49,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -53.32565033042686
+    "rotation": 180.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

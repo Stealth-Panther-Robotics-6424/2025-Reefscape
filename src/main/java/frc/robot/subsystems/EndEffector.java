@@ -183,7 +183,7 @@ public class EndEffector extends SubsystemBase {
 
   // Dynamic power intake based on sensor input
   public Command IntakeCoral() {
-    return createIntakeCommand(() -> intakeBeamStop(1));
+    return createIntakeCommand(() -> intakeBeamStop(1)).until(() -> !this.disBBValue());
   }
 
   // Command to toggle the intake solenoid, which controls the intake mechanism's

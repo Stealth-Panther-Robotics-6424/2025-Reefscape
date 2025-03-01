@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left Start L4"
+            "pathName": "Middle to G L4 "
           }
         },
         {
@@ -19,31 +19,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left L4 Intake"
+            "pathName": "G L4 to GH Algae"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Intake Coral"
+            "name": "Intake Algea"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Left L4 A"
+            "pathName": "GH Algae to Processor"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Shoot Coral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Drive Back"
+            "name": "Shoot Algea"
           }
         }
       ]

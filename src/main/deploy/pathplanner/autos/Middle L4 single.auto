@@ -5,12 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": " Leave and score in GH L4"
-          }
-        },
-        {
           "type": "wait",
           "data": {
             "waitTime": 3.0
@@ -19,7 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "New Path"
+            "pathName": "Middle to G L4 "
           }
         },
         {
