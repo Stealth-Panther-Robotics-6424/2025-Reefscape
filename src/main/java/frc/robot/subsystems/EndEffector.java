@@ -37,27 +37,24 @@ public class EndEffector extends SubsystemBase {
 
   // Shuffleboard tab for displaying the status of the intake system's sensors in
   // real-time on the driver station dashboard.
-  /*
-   * private ShuffleboardTab DS_EndEffectorTab =
-   * Shuffleboard.getTab("EndEffector");
-   * 
-   * // Shuffleboard entries to show the real-time state of the beam break
-   * sensors,
-   * // indicating whether an object is present.
-   * private GenericEntry DS_intakeBeamBreak = DS_EndEffectorTab.add("BB Forward",
-   * true).getEntry();
-   * private GenericEntry DS_disBeamBrake = DS_EndEffectorTab.add("BB Back",
-   * true).getEntry();
-   * private GenericEntry DS_IntakeSpeed = DS_EndEffectorTab.add("Intake Speed",
-   * .3)
-   * .withWidget(BuiltInWidgets.kNumberSlider)
-   * .getEntry();
-   * // Constructor for the EndEffector subsystem. Initializes the hardware
-   * // components and
-   * // their configurations.
-   * 
-   * double intakeSpeed = this.DS_IntakeSpeed.getDouble(0.2);
-   */
+
+  private ShuffleboardTab DS_EndEffectorTab = Shuffleboard.getTab("EndEffector");
+
+  // Shuffleboard entries to show the real-time state of the beam break sensors,
+  // indicating whether an object is present.
+  private GenericEntry DS_intakeBeamBreak = DS_EndEffectorTab.add("BB Forward",
+      true).getEntry();
+  private GenericEntry DS_disBeamBrake = DS_EndEffectorTab.add("BB Back",
+      true).getEntry();
+  private GenericEntry DS_IntakeSpeed = DS_EndEffectorTab.add("Intake Speed",
+      .3)
+      .withWidget(BuiltInWidgets.kNumberSlider)
+      .getEntry();
+  // Constructor for the EndEffector subsystem. Initializes the hardware
+  // components and
+  // their configurations.
+
+  double intakeSpeed = this.DS_IntakeSpeed.getDouble(0.2);
 
   public EndEffector() {
     // Configure the top intake motor settings through the motor's configurator.
@@ -197,12 +194,10 @@ public class EndEffector extends SubsystemBase {
   public void periodic() {
     // Update the state of the beam break sensors on the Shuffleboard dashboard for
     // real-time monitoring.
-    /*
-     * this.DS_intakeBeamBreak.setBoolean(intakeBBValue()); // Display the intake
-     * sensor status.
-     * this.DS_disBeamBrake.setBoolean(disBBValue()); // Display the discharge
-     * sensor status.
-     * this.intakeSpeed = this.DS_IntakeSpeed.getDouble(0.2);
-     */
+
+    this.DS_intakeBeamBreak.setBoolean(intakeBBValue()); // Display the intake sensor status.
+    this.DS_disBeamBrake.setBoolean(disBBValue()); // Display the discharge sensor status.
+    this.intakeSpeed = this.DS_IntakeSpeed.getDouble(0.2);
+
   }
 }

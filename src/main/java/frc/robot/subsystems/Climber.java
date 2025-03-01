@@ -42,28 +42,25 @@ public class Climber extends SubsystemBase {
   // subsystem in real-time on the driver's station.
   // Shuffleboard is a graphical interface that displays various robot data for
   // debugging and monitoring.
-  /*
-   * private ShuffleboardTab DS_ClimberTab = Shuffleboard.getTab("Climber");
-   * 
-   * // Adding widgets to the Shuffleboard that will display specific climber
-   * data:
-   * // - DS_ClimberPosition: Displays the climber's position.
-   * // - DS_maxElevatorSpeed: Displays the maximum speed at which the climber
-   * will
-   * // move.
-   * // - DS_forwardLimit: Displays a boolean value indicating whether the climber
-   * // can move forward.
-   * // - DS_reverseLimit: Displays a boolean value indicating whether the climber
-   * // can move in reverse.
-   * private GenericEntry DS_ClimberPosition = DS_ClimberTab.add("ClimberValue",
-   * 0).getEntry();
-   * private GenericEntry DS_maxElevatorSpeed = DS_ClimberTab.add("Climber Speed",
-   * .2).getEntry();
-   * private GenericEntry DS_forwardLimit = DS_ClimberTab.add("Forward Limit",
-   * true).getEntry();
-   * private GenericEntry DS_reverseLimit = DS_ClimberTab.add("Reverse Limit",
-   * true).getEntry();
-   */
+
+  private ShuffleboardTab DS_ClimberTab = Shuffleboard.getTab("Climber");
+
+  // Adding widgets to the Shuffleboard that will display specific climberdata:
+  // - DS_ClimberPosition: Displays the climber's position.
+  // - DS_maxElevatorSpeed: Displays the maximum speed at which the climber will
+  // move.
+  // - DS_forwardLimit: Displays a boolean value indicating whether the climber
+  // can move forward.
+  // - DS_reverseLimit: Displays a boolean value indicating whether the climber
+  // can move in reverse.
+  private GenericEntry DS_ClimberPosition = DS_ClimberTab.add("ClimberValue",
+      0).getEntry();
+  private GenericEntry DS_maxElevatorSpeed = DS_ClimberTab.add("Climber Speed",
+      .2).getEntry();
+  private GenericEntry DS_forwardLimit = DS_ClimberTab.add("Forward Limit",
+      true).getEntry();
+  private GenericEntry DS_reverseLimit = DS_ClimberTab.add("Reverse Limit",
+      true).getEntry();
 
   // Constructor for the Climber subsystem. This is called when the subsystem is
   // instantiated.

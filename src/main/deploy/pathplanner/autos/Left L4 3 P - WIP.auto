@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left Start L4"
+            "pathName": "Left Start L4 I"
           }
         },
         {
@@ -50,6 +50,18 @@
           "type": "named",
           "data": {
             "name": "Intake Coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake to L position L4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Coral"
           }
         }
       ]

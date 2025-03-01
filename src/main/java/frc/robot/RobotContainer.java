@@ -374,9 +374,11 @@ public class RobotContainer {
                                 .onTrue(climber.ManualClimber(() -> joystick.button(6).getAsBoolean(),
                                                 () -> joystick.button(5).getAsBoolean()));
 
-                buttonbord.button(12)
-                                .onTrue(Commands.parallel(wrist.ExitState(() -> canFold.getAsBoolean()),
-                                                elevator.ExitState(wristLimiter)));
+                /*
+                 * buttonbord.button(12)
+                 * .onTrue(Commands.parallel(wrist.ExitState(() -> canFold.getAsBoolean()),
+                 * elevator.ExitState(wristLimiter)));
+                 */
 
                 // Buttonboard button 8 toggles manual tray control for the intake
 

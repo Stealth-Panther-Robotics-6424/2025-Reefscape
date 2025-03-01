@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2252327127659575,
-        "y": 7.047240691489361
+        "x": 1.213563829787234,
+        "y": 6.965558510638298
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0331288240219196,
-        "y": 6.473581279739342
+        "x": 2.0214599410431964,
+        "y": 6.3918990988882785
       },
       "isLocked": false,
-      "linkedName": "End Of First Intake"
+      "linkedName": "End of intake part 2 left side"
     },
     {
       "anchor": {
-        "x": 3.9440824468085105,
-        "y": 5.296908244680851
+        "x": 3.6523603723404254,
+        "y": 5.121875
       },
       "prevControl": {
-        "x": 3.164314817172663,
-        "y": 5.816646708550373
+        "x": 2.872592742704578,
+        "y": 5.641613463869522
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "end of 2P"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -55,7 +55,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -53.32565033042686
+    "rotation": -53.36588612403263
   },
   "useDefaultConstraints": false
 }
