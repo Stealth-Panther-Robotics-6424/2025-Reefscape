@@ -11,6 +11,8 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 
@@ -27,13 +29,25 @@ public class Vision extends SubsystemBase {
 
   }
 
-  
+  public Command TelopVision() {
+
+    return new FunctionalCommand(
+        () -> {
+        }, // No initialization needed
+        () -> {
+        }, // Set intake motor power dynamically
+        interrupted -> {
+        }, // Stop motor if interrupted
+        () -> false, // Runs indefinitely
+        this // Pass the subsystem
+    );
+
+  }
 
   @Override
   public void periodic() {
-   
+
   }
   // This method will be called once per scheduler run
 
-  
 }

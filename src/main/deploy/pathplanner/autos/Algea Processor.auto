@@ -7,25 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Middle to G L4 "
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot Coral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Coral L4 To Algea GH"
+            "pathName": "GH Algae pick"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Intake Algea"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
           }
         },
         {

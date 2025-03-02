@@ -311,7 +311,7 @@ public class Wrist extends SubsystemBase {
   }
 
   public Command WristBarge(BooleanSupplier canFold) {
-    return wristCommandFactory(canFold, 0.242);
+    return wristCommandFactory(canFold, 0.242); // Potentially .308
     // Subsystem: This command is bound to the Wrist subsystem
   }
 

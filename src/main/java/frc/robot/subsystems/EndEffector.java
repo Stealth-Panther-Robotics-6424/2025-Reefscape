@@ -170,7 +170,7 @@ public class EndEffector extends SubsystemBase {
 
   // Command to manually run the intake system in the reverse direction (backfeed)
   public Command ShootAlgea() {
-    return createIntakeCommand(.4);
+    return createIntakeCommand(.2);
   }
 
   // Command to stop the intake system

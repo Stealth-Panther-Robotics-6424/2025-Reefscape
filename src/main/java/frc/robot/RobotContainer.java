@@ -109,6 +109,7 @@ public class RobotContainer {
         private final Trigger isEnabled;
         private final Trigger isDisabled;
         private final Trigger algeaModeEnabled;
+        private final Trigger reverseLimitHit;
 
         /* Some triggers related to elevator throttles (to be developed in Sprint 4) */
         /*
@@ -140,6 +141,7 @@ public class RobotContainer {
                 isEnabled = new Trigger(() -> DriverStation.isEnabled());
                 isDisabled = new Trigger(() -> DriverStation.isDisabled());
                 algeaModeEnabled = new Trigger(() -> getAlgeaMode());
+                reverseLimitHit = elevator.reverseLimitHit();
 
                 // selector on the dashboard
 
@@ -151,8 +153,9 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Intake Coral", endEffector.IntakeCoral());
                 NamedCommands.registerCommand("Stop Intake", endEffector.nothing().withTimeout(0.1));
                 NamedCommands.registerCommand("Shoot Coral", endEffector.shootCoral().withTimeout(.25));
-                NamedCommands.registerCommand("Shoot Algea", endEffector.ShootAlgea().withTimeout(.25));
-                NamedCommands.registerCommand("Intake Algea", endEffector.IntakeAlgea());
+                NamedCommands.registerCommand("Shoot Algea", endEffector.ShootAlgea().withTimeout(2));
+                NamedCommands.registerCommand("Intake Algea", endEffector.IntakeAlgea().withTimeout(.5));
+                NamedCommands.registerCommand("Hold Algea", endEffector.HoldAlgea());
 
                 new EventTrigger("L4").onTrue((Commands.sequence(wrist.WristSafety(
                                 () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
@@ -163,6 +166,12 @@ public class RobotContainer {
                 new EventTrigger("A1").onTrue(Commands.sequence(wrist.WristSafety(
                                 () -> canFold.getAsBoolean()), elevator.ElevatorA1(wristLimiter),
                                 wrist.WristA1(() -> canFold.getAsBoolean())));
+
+                new EventTrigger("Processor").onTrue(Commands.sequence(wrist.WristSafety(
+                                () -> canFold.getAsBoolean()),
+                                elevator.ElevatorProcessor(wristLimiter),
+                                wrist.WristProcessor(() -> canFold
+                                                .getAsBoolean())));
 
                 /*
                  * NamedCommands.registerCommand("Wrist Safety", wrist.WristSafety(canFold));
@@ -363,22 +372,22 @@ public class RobotContainer {
                                                 wrist.WristProcessor(() -> canFold
                                                                 .getAsBoolean())));
 
-                algeaModeEnabled.and(buttonbord.button(9))
-                                .onTrue(Commands.sequence(wrist.WristSafety(
-                                                () -> canFold.getAsBoolean()),
-                                                elevator.ElevatorProcessor(wristLimiter),
-                                                wrist.WristProcessor(() -> canFold
-                                                                .getAsBoolean())));
+                /*
+                 * algeaModeEnabled.and(buttonbord.button(9))
+                 * .onTrue(Commands.sequence(wrist.WristSafety(
+                 * () -> canFold.getAsBoolean()),
+                 * elevator.ElevatorProcessor(wristLimiter),
+                 * wrist.WristProcessor(() -> canFold
+                 * .getAsBoolean())));
+                 */
 
                 joystick.button(5).or(joystick.button(6))
                                 .onTrue(climber.ManualClimber(() -> joystick.button(6).getAsBoolean(),
                                                 () -> joystick.button(5).getAsBoolean()));
 
-                /*
-                 * buttonbord.button(12)
-                 * .onTrue(Commands.parallel(wrist.ExitState(() -> canFold.getAsBoolean()),
-                 * elevator.ExitState(wristLimiter)));
-                 */
+                RobotModeTriggers.teleop().whileTrue(vision.TelopVision());
+
+                // (reverseLimitHit).onTrue(elevator.Zero());
 
                 // Buttonboard button 8 toggles manual tray control for the intake
 

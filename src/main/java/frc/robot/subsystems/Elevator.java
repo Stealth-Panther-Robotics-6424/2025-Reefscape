@@ -94,7 +94,7 @@ public class Elevator extends SubsystemBase {
 
     // Set initial PID controller setpoint to current elevator position.
     elevatorController.setSetpoint(getElevatorPosition());
-    elevatorController.setTolerance(0.67); // Set tolerance to 1 (tolerance defines when the PID controller considers
+    elevatorController.setTolerance(.67); // Set tolerance to 1 (tolerance defines when the PID controller considers
     // the
     // target reached)
     // elevatorTalonStrb.setPosition(0); // Possible initial position setting for
@@ -131,7 +131,7 @@ public class Elevator extends SubsystemBase {
   // Method to set power to both elevator motors, considering limits.
   public void setElevatorMotor(double power) {
     double output = elevatorLimit(power);
-    double kFValue = 0.03;
+    double kFValue = this.kfValueSetter();
     SmartDashboard.putNumber("LimitOutput", output); //
     // Apply limit on power to prevent the elevator from exceeding boundaries (e.g.,
     // going beyond the upper or lower limit).
@@ -171,6 +171,17 @@ public class Elevator extends SubsystemBase {
 
   }
 
+  public double kfValueSetter() {
+    double kF = 0;
+    if (this.getElevatorPosition() < 0.5) {
+      kF = 0;
+    } else {
+      kF = .023;
+    }
+
+    return kF;
+  }
+
   public double elevatorThrottle() {
     return ((1 - 0.5 * (this.getElevatorPosition() / 65.71))); // This method is used to slow the drivespeed down based
                                                                // on
@@ -189,16 +200,19 @@ public class Elevator extends SubsystemBase {
 
   }
 
-  public void checkLimitAndReset() // Check if the built-in reverse limit switch is triggered
-  {
-    if (elevatorTalonStrb.getReverseLimit().getValueAsDouble() == 1) {
-      if (this.getElevatorPosition() != 0) {
-        elevatorTalonStrb.setPosition(0);
-        elevatorTalonPort.setPosition(0); // Reset the value to zero
-        System.out.println("Limit switch activated, resetting value to zero");
+  public Trigger reverseLimitHit() { // this method sets whether the wrist can fold back based on the elevator
+    // position this prevents folding back into the crossmembers
+    // Original values in order 26, 50.5, 59, 104
+    // new values in order 14.86, 28.86, 33.71, 59.43
+    return new Trigger(() -> (elevatorTalonStrb.getReverseLimit().getValueAsDouble() == 1));
 
-      }
-      ;
+  }
+
+  public void zeroElevator() // Check if the built-in reverse limit
+  {
+    {
+      elevatorTalonStrb.setPosition(0);
+      elevatorTalonPort.setPosition(0); // Reset the value to zero
     }
   }
 
@@ -255,6 +269,13 @@ public class Elevator extends SubsystemBase {
    * }
    */
 
+  public Command Zero() {
+    return this.runOnce(() -> {
+      this.zeroElevator();
+
+    });
+  }
+
   // Default PID elevator control command, continuously adjusting the elevator's
   // position based on the PID controller.
   public Command elevatorPIDCommandDefault(BooleanSupplier wristLimiter) {
@@ -279,7 +300,8 @@ public class Elevator extends SubsystemBase {
         this);
   }
 
-  // Command to move the elevator to a position based on a given setpoint.
+  // Command to move the elevator to a position based on a given setpoint. 1.09
+  // rotations = 1 inch of height
   public Command MovetoPosition(BooleanSupplier wristLimiter, double position) {
     return new FunctionalCommand(
         () -> {
@@ -306,20 +328,20 @@ public class Elevator extends SubsystemBase {
   // Command to move the elevator to the L1 position (0).
   public Command ElevatorL1(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 0);
+    return MovetoPosition(wristLimiter, -0.6);
 
   }
 
   // Command to move the elevator to the L2 position OG(20) New (11.43)
   public Command ElevatorL2(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 11.43);
+    return MovetoPosition(wristLimiter, 12.52);
   }
 
   // Command to move the elevator to the L3 position OG(52.7). New (30.11)
   public Command ElevatorL3(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 30.11);
+    return MovetoPosition(wristLimiter, 31.2);
   }
 
   // Command to move the elevator to the L4 position OG (113.7). New(64.97)
@@ -340,12 +362,12 @@ public class Elevator extends SubsystemBase {
 
   public Command ElevatorProcessor(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 0);
+    return MovetoPosition(wristLimiter, -0.6);
   }
 
   public Command ElevatorBarge(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 66); // OG (114.4) New (65.37)
+    return MovetoPosition(wristLimiter, 66.25); // OG (114.4) New (65.37)
   }
 
   // Command to exit the current elevator state and maintain its position.
@@ -367,6 +389,9 @@ public class Elevator extends SubsystemBase {
 
     // Update the current position of the elevator.
     this.DS_ElevatorPosition.setDouble(getElevatorPosition());
+    if ((elevatorTalonStrb.getReverseLimit().getValueAsDouble() == 1) && (this.getElevatorPosition() != 0)) {
+      this.zeroElevator();
+    }
 
     // Update the current status of the forward and reverse limit switches.
     this.DS_forwardLimit.setDouble((this.elevatorTalonStrb.getForwardLimit().getValueAsDouble()));
