@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 
 public class EndEffector extends SubsystemBase {
@@ -90,6 +91,12 @@ public class EndEffector extends SubsystemBase {
   // beam break sensor states.
   // If either of the sensors detects an object, it limits the motor power to a
   // lower value.
+
+  public Trigger BBLockout() {
+    return new Trigger(() -> this.disBBValue() && !this.intakeBBValue());
+    // Create a trigger that activates when the wrist position is below 0.09
+  }
+
   private double intakeBeamStop(double power) {
     double output = 0; // Initialize the output power to 0.
 
@@ -180,7 +187,7 @@ public class EndEffector extends SubsystemBase {
 
   // Dynamic power intake based on sensor input
   public Command IntakeCoral() {
-    return createIntakeCommand(() -> intakeBeamStop(1)).until(() -> !this.disBBValue());
+    return createIntakeCommand(() -> intakeBeamStop(.95)).until(() -> !this.disBBValue());
   }
 
   // Command to toggle the intake solenoid, which controls the intake mechanism's

@@ -55,19 +55,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left Side Intake to A L4"
+            "pathName": "Right Side Intake to AB trough"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Shoot Coral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "End of Auto Drive Back from A"
           }
         }
       ]
