@@ -59,20 +59,27 @@ public class Wrist extends SubsystemBase {
   boolean safeFold = false;
   double MotorPower = 0;
   // Shuffleboard setup to display wrist data for debugging and tuning
-  private final PIDController wristController = new PIDController(3, 0, 0);
+  private final PIDController wristController = new PIDController(7.5, 0, 0);
   // PID controller to maintain wrist position by calculating the appropriate
   // motor output
+
   private ShuffleboardTab DS_WristTab = Shuffleboard.getTab("Wrist");
   // Create a new tab on the Shuffleboard for wrist data visualization
-  private GenericEntry DS_WristPosition = DS_WristTab.add("WristValue", wristSpeed).getEntry();
+  private GenericEntry DS_WristPosition = DS_WristTab.add("WristValue",
+      wristSpeed).getEntry();
 
   // Add an entry to display the wrist's current position on Shuffleboard
-  private GenericEntry DS_WristSpeed = DS_WristTab.add("WristSpeed", 0.3) // Does not work TODO fic
-      .withWidget(BuiltInWidgets.kNumberSlider)
-      .withProperties(Map.of("min", 0.1, "max", 1.0)) // Ensures valid range for tuning
-      .getEntry();
+  /*
+   * private GenericEntry DS_WristSpeed = DS_WristTab.add("WristSpeed", 0.3)
+   * // Does not work TODO fic
+   * .withWidget(BuiltInWidgets.kNumberSlider)
+   * .withProperties(Map.of("min", 0.1, "max", 1.0)) // Ensures valid range for
+   * tuning
+   * .getEntry();
+   */
 
-  private GenericEntry DS_WristSetpoint = DS_WristTab.add("WristSetpoint", wristController.getSetpoint()).getEntry();
+  private GenericEntry DS_WristSetpoint = DS_WristTab.add("WristSetpoint",
+      wristController.getSetpoint()).getEntry();
 
   // Add a speed slider to adjust the maximum wrist speed in real-time through
   // Shuffleboard
@@ -100,7 +107,7 @@ public class Wrist extends SubsystemBase {
     // wrist position
     wristController.setTolerance(.01);
 
-    wristSpeed = DS_WristSpeed.getDouble(0.3);
+    // wristSpeed = DS_WristSpeed.getDouble(0.3);
 
     // Set the tolerance for the PID controller (how close the motor has to be to
     // the setpoint to stop adjusting)
@@ -190,7 +197,7 @@ public class Wrist extends SubsystemBase {
   }
 
   private void wristSpeedSet() {
-    this.wristSpeed = this.DS_WristSpeed.getDouble(0.2);
+    // this.wristSpeed = this.DS_WristSpeed.getDouble(0.2);
   }
 
   // Command to run the wrist motor with PID control
@@ -221,7 +228,7 @@ public class Wrist extends SubsystemBase {
           this.wristSpeedSet();
         }, // Initialize: No action needed
         () -> {
-          this.wristSpeed = this.DS_WristSpeed.getDouble(wristSpeed);
+          // this.wristSpeed = this.DS_WristSpeed.getDouble(wristSpeed);
           this.setWristMotor(wristJoystick.getAsDouble() * 0.3);
         }, // Execute: Set wrist motor power based
         // this.wristSpeed
@@ -248,6 +255,9 @@ public class Wrist extends SubsystemBase {
 
         },
         interrupted -> {
+          this.setWristPID(this.getWristPosition());
+          this.setWristMotor(0);
+
         }, // Interrupted: No specific action when interrupted
         () -> this.wristAtSetpoint(), // Finish condition: Check if wrist has reached L1 position
         this);
@@ -255,7 +265,7 @@ public class Wrist extends SubsystemBase {
 
   // Command to start the wrist motor but with no action (used for state
   // transitions)
-  public Command startWristCommand() {
+  public Command startWristCommand() { // This command makes the wrist hold its starting position
     return this.runOnce(() -> {
       this.setWristPID(this.getWristPosition());
     });
@@ -263,11 +273,13 @@ public class Wrist extends SubsystemBase {
 
   // Command to ensure the wrist is moved to a safe position
   public Command WristSafety(BooleanSupplier canFold) {
-    return wristCommandFactory(canFold, 0.045).until(() -> this.getWristPosition() < 0.07);
+    return wristCommandFactory(canFold, 0.03).until(() -> this.getWristPosition() < 0.06); // this command makes
+    // sure the wrist is in an orientation that can't crash
   }
 
   // Commands for moving the wrist to various predefined positions (L1, L2, L3,
-  // L4)
+  // L4) to edit these positions change the number linked to the position inside
+  // wristCommandFactory
   public Command WristL1(BooleanSupplier canFold) {
     return wristCommandFactory(canFold, 0.459);
     // Subsystem: This command is bound to the Wrist subsystem
@@ -299,12 +311,17 @@ public class Wrist extends SubsystemBase {
   }
 
   public Command WristBarge(BooleanSupplier canFold) {
-    return wristCommandFactory(canFold, 0.242);
+    return wristCommandFactory(canFold, 0.242); // Potentially .308
     // Subsystem: This command is bound to the Wrist subsystem
   }
 
   public Command WristProcessor(BooleanSupplier canFold) {
-    return wristCommandFactory(canFold, 0.01);
+    return wristCommandFactory(canFold, -.01);
+    // Subsystem: This command is bound to the Wrist subsystem
+  }
+
+  public Command WristClimber(BooleanSupplier canFold) {
+    return wristCommandFactory(canFold, 0.4);
     // Subsystem: This command is bound to the Wrist subsystem
   }
 
@@ -318,10 +335,11 @@ public class Wrist extends SubsystemBase {
   // data
   @Override
   public void periodic() {
+
     this.DS_WristPosition.setDouble(getWristPosition()); // Update the wrist's current position on Shuffleboard
     // Update wrist motor speed based on Shuffleboard slider
     // input
-    this.wristSpeed = this.DS_WristSpeed.getDouble(wristSpeed);
+    // this.wristSpeed = this.DS_WristSpeed.getDouble(wristSpeed);
     this.DS_WristSetpoint.setDouble(wristController.getSetpoint());
 
     // This method runs periodically to keep the wrist data current and allow for

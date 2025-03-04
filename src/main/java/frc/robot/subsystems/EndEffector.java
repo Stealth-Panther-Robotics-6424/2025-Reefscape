@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 
 public class EndEffector extends SubsystemBase {
@@ -37,13 +38,17 @@ public class EndEffector extends SubsystemBase {
 
   // Shuffleboard tab for displaying the status of the intake system's sensors in
   // real-time on the driver station dashboard.
+
   private ShuffleboardTab DS_EndEffectorTab = Shuffleboard.getTab("EndEffector");
 
   // Shuffleboard entries to show the real-time state of the beam break sensors,
   // indicating whether an object is present.
-  private GenericEntry DS_intakeBeamBreak = DS_EndEffectorTab.add("BB Forward", true).getEntry();
-  private GenericEntry DS_disBeamBrake = DS_EndEffectorTab.add("BB Back", true).getEntry();
-  private GenericEntry DS_IntakeSpeed = DS_EndEffectorTab.add("Intake Speed", .3)
+  private GenericEntry DS_intakeBeamBreak = DS_EndEffectorTab.add("BB Forward",
+      true).getEntry();
+  private GenericEntry DS_disBeamBrake = DS_EndEffectorTab.add("BB Back",
+      true).getEntry();
+  private GenericEntry DS_IntakeSpeed = DS_EndEffectorTab.add("Intake Speed",
+      .3)
       .withWidget(BuiltInWidgets.kNumberSlider)
       .getEntry();
   // Constructor for the EndEffector subsystem. Initializes the hardware
@@ -86,6 +91,12 @@ public class EndEffector extends SubsystemBase {
   // beam break sensor states.
   // If either of the sensors detects an object, it limits the motor power to a
   // lower value.
+
+  public Trigger BBLockout() {
+    return new Trigger(() -> this.disBBValue() && !this.intakeBBValue());
+    // Create a trigger that activates when the wrist position is below 0.09
+  }
+
   private double intakeBeamStop(double power) {
     double output = 0; // Initialize the output power to 0.
 
@@ -146,7 +157,7 @@ public class EndEffector extends SubsystemBase {
   // Usage of the reusable method with original names and casing
   // Command to manually run the intake system in the forward direction (intake
   // mode)
-  public Command manualIntake() {
+  public Command shootCoral() {
     return createIntakeCommand(1);
   }
 
@@ -166,7 +177,7 @@ public class EndEffector extends SubsystemBase {
 
   // Command to manually run the intake system in the reverse direction (backfeed)
   public Command ShootAlgea() {
-    return createIntakeCommand(.4);
+    return createIntakeCommand(.2);
   }
 
   // Command to stop the intake system
@@ -176,7 +187,7 @@ public class EndEffector extends SubsystemBase {
 
   // Dynamic power intake based on sensor input
   public Command IntakeCoral() {
-    return createIntakeCommand(() -> intakeBeamStop(1));
+    return createIntakeCommand(() -> intakeBeamStop(.95)).until(() -> !this.disBBValue());
   }
 
   // Command to toggle the intake solenoid, which controls the intake mechanism's
@@ -190,8 +201,10 @@ public class EndEffector extends SubsystemBase {
   public void periodic() {
     // Update the state of the beam break sensors on the Shuffleboard dashboard for
     // real-time monitoring.
+
     this.DS_intakeBeamBreak.setBoolean(intakeBBValue()); // Display the intake sensor status.
     this.DS_disBeamBrake.setBoolean(disBBValue()); // Display the discharge sensor status.
     this.intakeSpeed = this.DS_IntakeSpeed.getDouble(0.2);
+
   }
 }

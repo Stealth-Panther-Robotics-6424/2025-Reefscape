@@ -42,9 +42,10 @@ public class Climber extends SubsystemBase {
   // subsystem in real-time on the driver's station.
   // Shuffleboard is a graphical interface that displays various robot data for
   // debugging and monitoring.
+
   private ShuffleboardTab DS_ClimberTab = Shuffleboard.getTab("Climber");
 
-  // Adding widgets to the Shuffleboard that will display specific climber data:
+  // Adding widgets to the Shuffleboard that will display specific climberdata:
   // - DS_ClimberPosition: Displays the climber's position.
   // - DS_maxElevatorSpeed: Displays the maximum speed at which the climber will
   // move.
@@ -52,10 +53,14 @@ public class Climber extends SubsystemBase {
   // can move forward.
   // - DS_reverseLimit: Displays a boolean value indicating whether the climber
   // can move in reverse.
-  private GenericEntry DS_ClimberPosition = DS_ClimberTab.add("ClimberValue", 0).getEntry();
-  private GenericEntry DS_maxElevatorSpeed = DS_ClimberTab.add("Climber Speed", .2).getEntry();
-  private GenericEntry DS_forwardLimit = DS_ClimberTab.add("Forward Limit", true).getEntry();
-  private GenericEntry DS_reverseLimit = DS_ClimberTab.add("Reverse Limit", true).getEntry();
+  private GenericEntry DS_ClimberPosition = DS_ClimberTab.add("ClimberValue",
+      0).getEntry();
+  private GenericEntry DS_maxElevatorSpeed = DS_ClimberTab.add("Climber Speed",
+      .2).getEntry();
+  private GenericEntry DS_forwardLimit = DS_ClimberTab.add("Forward Limit",
+      true).getEntry();
+  private GenericEntry DS_reverseLimit = DS_ClimberTab.add("Reverse Limit",
+      true).getEntry();
 
   // Constructor for the Climber subsystem. This is called when the subsystem is
   // instantiated.
@@ -117,7 +122,7 @@ public class Climber extends SubsystemBase {
   public void setClimberMotor(double power) {
     // Calls the setMotorPower method with the power returned from the
 
-    setMotorPower(climberTalon, power);
+    setMotorPower(climberTalon, climberLimit(power));
 
   }
 
@@ -131,9 +136,9 @@ public class Climber extends SubsystemBase {
 
     // If either of these conditions is true, the motor power is set to 0 to
 
-    if ((climberCanCoder.getAbsolutePosition().getValueAsDouble() > 0.4 &&
+    if ((climberCanCoder.getAbsolutePosition().getValueAsDouble() >= 0 &&
         power < 0)
-        || (climberCanCoder.getAbsolutePosition().getValueAsDouble() < 0.01 &&
+        || (climberCanCoder.getAbsolutePosition().getValueAsDouble() <= -0.352 &&
             power > 0)) {
       output = 0; // Prevent movement beyond the limits of the climber mechanism
     } else {
@@ -167,9 +172,11 @@ public class Climber extends SubsystemBase {
         }, // Initialize: No action needed
         () -> {
           if (forwards.getAsBoolean()) {
-            setClimberMotor(.2);
+            setClimberMotor(1);
+
           } else if (backwards.getAsBoolean()) {
-            setClimberMotor(-0.2);
+            setClimberMotor(-1);
+
           } else {
             setClimberMotor(0);
           }
@@ -196,12 +203,23 @@ public class Climber extends SubsystemBase {
   // Command to manually control the intake tray motor.
   // This command allows for manual control of the tray, moving it forward or
   // backward.
-  public Command TrayManual() {
+  public Command TrayManualUp() {
     return new FunctionalCommand(() -> {
     }, () -> {
       setTray(1); // Set the tray motor to forward power.
     }, interrpted -> {
-      setTray(-1); // Set the tray motor to reverse power if the command is interrupted.
+      ;
+    }, () -> {
+      return false; // Command should run indefinitely until interrupted or canceled.
+    }, this); // Pass this subsystem (Intake) to the command.
+  }
+
+  public Command TrayManualDown() {
+    return new FunctionalCommand(() -> {
+    }, () -> {
+      setTray(-1); // Set the tray motor to forward power.
+    }, interrpted -> {
+      ; // Set the tray motor to reverse power if the command is interrupted.
     }, () -> {
       return false; // Command should run indefinitely until interrupted or canceled.
     }, this); // Pass this subsystem (Intake) to the command.

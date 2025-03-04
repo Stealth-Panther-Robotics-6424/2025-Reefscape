@@ -6,6 +6,7 @@
  *  Base Sprint 1/27/2025
  *  Base Sprint 3.0 
  *  Base Sprint 4.0
+ *  Base Sprint 5.0
 */
 
 // Import necessary packages for robot control, mathematical operations, and subsystem handling
@@ -18,12 +19,15 @@ import java.lang.reflect.Method;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.events.EventTrigger;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -32,8 +36,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.command.UpdateLocalizationWithVision;
+import frc.robot.command.MergeVisionOdometryCommand;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Climber;
@@ -41,6 +48,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Wrist;
 import frc.robot.subsystems.EndEffector;
+import frc.robot.subsystems.Vision;
 
 @SuppressWarnings("unused")
 public class RobotContainer {
@@ -73,8 +81,8 @@ public class RobotContainer {
         private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
         /* Path follower for autonomous control */
-        // private final SendableChooser<Command> autoChooser;
-
+        // private SendableChooser<String> autoChooser;
+        private SendableChooser<Command> autoChooser;
         // Create a telemetry logger for monitoring robot stats
         // private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -82,23 +90,27 @@ public class RobotContainer {
         // board
         private final CommandJoystick joystick = new CommandJoystick(0); // My joystick
         private final CommandJoystick buttonbord = new CommandJoystick(1); // Buttonboard joystick
-        private final Wrist wrist = new Wrist(); // Wrist subsystem for arm control
-        private final Elevator elevator = new Elevator(); // Elevator subsystem for vertical movements
-        private final EndEffector endEffector = new EndEffector(); // Intake subsystem for grabbing objects
-        private final Climber climber = new Climber(); // Intake subsystem for grabbing objects
+        private final Wrist wrist; // Wrist subsystem for arm control
+        private final Elevator elevator; // Elevator subsystem for vertical movements
+        private final EndEffector endEffector; // Intake subsystem for grabbing objects
+        private final Climber climber; // Intake subsystem for grabbing objects
+        private final Vision vision; // Intake subsystem for grabbing objects
 
         private boolean AlgeaMode = false;
 
         // Instantiate the swerve drivetrain subsystem
-        public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+        public final CommandSwerveDrivetrain drivetrain;
+
         // Define triggers for controlling wrist and elevator limits
-        private final Trigger wristLimiter = wrist.wristLimiter();
-        private final Trigger canFold = elevator.canFold();
-        private final Trigger wristIntake = wrist.wristIntake();
-        private final Trigger elevatorIntake = elevator.elevatorIntake();
-        private final Trigger isEnabled = new Trigger(() -> DriverStation.isEnabled());
-        private final Trigger isDisabled = new Trigger(() -> DriverStation.isDisabled());
-        private final Trigger algeaModeEnabled = new Trigger(() -> getAlgeaMode());
+        private final Trigger wristLimiter;
+        private final Trigger canFold;
+        private final Trigger wristIntake;
+        private final Trigger elevatorIntake;
+        private final Trigger isEnabled;
+        private final Trigger isDisabled;
+        private final Trigger algeaModeEnabled;
+        private final Trigger reverseLimitHit;
+        private final Trigger BBLockout;
 
         /* Some triggers related to elevator throttles (to be developed in Sprint 4) */
         /*
@@ -116,31 +128,82 @@ public class RobotContainer {
          */
         public RobotContainer() {
                 // Set up autonomous command chooser using PathPlanner
-                // autoChooser = AutoBuilder.buildAutoChooser();
-                // SmartDashboard.putData("Auto Mode", autoChooser); // Display auto mode
+                drivetrain = TunerConstants.createDrivetrain();
+                wrist = new Wrist();
+                elevator = new Elevator(); // Elevator subsystem for vertical movements
+                endEffector = new EndEffector(); // Intake subsystem for grabbing objects
+                climber = new Climber(); // Intake subsystem for grabbing objects
+                vision = new Vision();
+
+                wristLimiter = wrist.wristLimiter();
+                canFold = elevator.canFold();
+                BBLockout = endEffector.BBLockout();
+                wristIntake = wrist.wristIntake();
+                elevatorIntake = elevator.elevatorIntake();
+                isEnabled = new Trigger(() -> DriverStation.isEnabled());
+                isDisabled = new Trigger(() -> DriverStation.isDisabled());
+                algeaModeEnabled = new Trigger(() -> getAlgeaMode());
+                reverseLimitHit = elevator.reverseLimitHit();
+
                 // selector on the dashboard
 
                 // Define and register commands for the intake subsystem with different
                 // behaviors
-                /*
-                 * NamedCommands.registerCommand("IntakeCoral", intake.IntakeCoral(() -> true,
-                 * () -> false).withTimeout(3));
-                 * NamedCommands.registerCommand("StopIntake", intake.IntakeCoral(() -> false,
-                 * () -> false).withTimeout(0.1));
-                 * NamedCommands.registerCommand("SpitCoral", intake.IntakeCoral(() -> false, ()
-                 * -> true).withTimeout(3));
-                 */
 
                 configureBindings(); // Configure control bindings for robot functions
+
+                NamedCommands.registerCommand("Intake Coral", endEffector.IntakeCoral());
+                NamedCommands.registerCommand("Stop Intake", endEffector.nothing().withTimeout(0.1));
+                NamedCommands.registerCommand("Shoot Coral", endEffector.shootCoral().withTimeout(.25));
+                NamedCommands.registerCommand("Shoot Algea", endEffector.ShootAlgea().withTimeout(2));
+                NamedCommands.registerCommand("Intake Algea", endEffector.IntakeAlgea().withTimeout(.5));
+                NamedCommands.registerCommand("Hold Algea", endEffector.HoldAlgea());
+
+                new EventTrigger("L4").onTrue((Commands.sequence(wrist.WristSafety(
+                                () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
+                                wrist.WristL4(() -> canFold.getAsBoolean()))));
+                new EventTrigger("L1").onTrue(Commands.sequence(wrist.WristSafety(
+                                () -> canFold.getAsBoolean()), elevator.ElevatorL1(wristLimiter),
+                                wrist.WristL1(() -> canFold.getAsBoolean())));
+                new EventTrigger("A1").onTrue(Commands.sequence(wrist.WristSafety(
+                                () -> canFold.getAsBoolean()), elevator.ElevatorA1(wristLimiter),
+                                wrist.WristA1(() -> canFold.getAsBoolean())));
+
+                new EventTrigger("Processor").onTrue(Commands.sequence(wrist.WristSafety(
+                                () -> canFold.getAsBoolean()),
+                                elevator.ElevatorProcessor(wristLimiter),
+                                wrist.WristProcessor(() -> canFold
+                                                .getAsBoolean())));
+
+                /*
+                 * NamedCommands.registerCommand("Wrist Safety", wrist.WristSafety(canFold));
+                 * NamedCommands.registerCommand("L4 Elevator",
+                 * elevator.ElevatorL4(wristLimiter));
+                 * NamedCommands.registerCommand("L4 Wrist", wrist.WristL4(canFold));
+                 * 
+                 * 
+                 * NamedCommands.registerCommand("L4 Command",
+                 * (Commands.sequence(wrist.WristSafety(
+                 * () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
+                 * wrist.WristL4(() -> canFold.getAsBoolean()))));
+                 * 
+                 * 
+                 */
+
+                // autoChooser = new SendableChooser<String>();
+                // autoChooser.addOption("test auto", "test auto");
+                autoChooser = AutoBuilder.buildAutoChooser();
+
+                SmartDashboard.putData("Auto Mode", autoChooser); // Display auto mode
         }
 
-        public boolean getAlgeaMode() {
+        public boolean getAlgeaMode() { // Sets whether the commands are based on algea or coral
                 return this.AlgeaMode;
 
         }
 
         public void DS_Update() {
-                this.DS_AlgeaMode.setBoolean(this.getAlgeaMode());
+                this.DS_AlgeaMode.setBoolean(this.getAlgeaMode()); // updates the current mode of the robot
 
         }
 
@@ -148,6 +211,8 @@ public class RobotContainer {
         private void configureBindings() {
 
                 buttonbord.button(8).onTrue(Commands.runOnce(() -> this.AlgeaMode = !this.AlgeaMode));
+
+                vision.setDefaultCommand(new MergeVisionOdometryCommand(vision, drivetrain));
 
                 // Drivetrain control for swerve drive based on joystick input
                 drivetrain.setDefaultCommand(
@@ -218,22 +283,36 @@ public class RobotContainer {
                 // Register telemetry logging for the drivetrain subsystem
                 // drivetrain.registerTelemetry(logger::telemeterize);
 
-                // Intake command bindings, such as when to turn on intake or control trays
-                endEffector.setDefaultCommand(endEffector.nothing());
+                // Endeffector command bindings, such as when to turn on intake or control trays
+                endEffector.setDefaultCommand(endEffector.nothing()); // Default is do nothing
+                // Coral Commands
                 algeaModeEnabled.negate().and(elevator.elevatorIntake().and(wrist.wristIntake()))
-                                .whileTrue(endEffector.IntakeCoral());
-                algeaModeEnabled.negate().and(buttonbord.button(5)).whileTrue(endEffector.IntakeCoral());
-                algeaModeEnabled.negate().and(buttonbord.button(2)).whileTrue(endEffector.manualIntake());
-                algeaModeEnabled.negate().and(buttonbord.button(3)).whileTrue(endEffector.manualBackFeed());
-                algeaModeEnabled.and(buttonbord.button(5)).whileTrue(endEffector.IntakeAlgea());
+                                .and(() -> RobotState.isTeleop())
+                                .whileTrue(endEffector.IntakeCoral());// When algea mode is disabled and the elevator
+                                                                      // and wrist are in the L1 position
 
+                // intake coral
+
+                algeaModeEnabled.negate().and(buttonbord.button(5)).whileTrue(endEffector.IntakeCoral());
+                // When algea mode is diabled and button 5 is hit Intake coral manually
+                algeaModeEnabled.negate().and(buttonbord.button(2)).whileTrue(endEffector.shootCoral());
+                // When algea mode is diabled and button 2 is hit shoot coral
+                algeaModeEnabled.negate().and(buttonbord.button(3)).whileTrue(endEffector.manualBackFeed());
+                // When algea mode is diabled and button 3 is hit backfeed coral
+
+                // Algea Commands
+                algeaModeEnabled.and(buttonbord.button(5)).whileTrue(endEffector.IntakeAlgea());
+                // When algea mode is enabled and button 5 is hit Intake algea
                 algeaModeEnabled.and(buttonbord.button(5).negate()).and(buttonbord.button(2)
                                 .negate())
                                 .whileTrue(endEffector.HoldAlgea());
+                // When algea mode is enabled and button 2 and button 5 are not hit hold algea
+                // by applying a 3% back spin
 
-                // buttonbord.button(6).whileTrue(endEffector.HoldAlgea());
                 algeaModeEnabled.and(buttonbord.button(2)).and(buttonbord.button(5).negate())
                                 .whileTrue(endEffector.ShootAlgea());
+                // When algea mode is enabled and button 2 is hit and button 5 is not hit shoot
+                // algea
 
                 // Commands for wrist and elevator control using buttonboard inputs
                 wrist.setDefaultCommand(wrist.WristPIDCommandDefault(() -> canFold.getAsBoolean()));
@@ -250,69 +329,81 @@ public class RobotContainer {
                 // Commands to preserve position when enabled
                 this.isEnabled.onTrue(elevator.startCommand(wristLimiter));
                 this.isEnabled.onTrue(wrist.startWristCommand());
-                this.isDisabled.onTrue(elevator.EndCommand(wristLimiter));
+                // this.isDisabled.onTrue(elevator.EndCommand(wristLimiter));
 
                 // Wrist and elevator commands for specific positions, triggered by button
                 // presses
-                algeaModeEnabled.negate().and(buttonbord.button(1))
+                (BBLockout.negate()).and(algeaModeEnabled.negate().and(buttonbord.button(1)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
                                                 wrist.WristL4(() -> canFold.getAsBoolean())));
-                algeaModeEnabled.negate().and(buttonbord.button(4))
+                (BBLockout.negate()).and(algeaModeEnabled.negate().and(buttonbord.button(4)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorL3(wristLimiter),
                                                 wrist.WristL3(() -> canFold.getAsBoolean())));
-                algeaModeEnabled.negate().and(buttonbord.button(7))
+                (BBLockout.negate()).and(algeaModeEnabled.negate().and(buttonbord.button(7)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorL2(wristLimiter),
                                                 wrist.WristL2(() -> canFold.getAsBoolean())));
-                algeaModeEnabled.negate().and(buttonbord.button(11))
+                (BBLockout.negate()).and(algeaModeEnabled.negate().and(buttonbord.button(11)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorL1(wristLimiter),
                                                 wrist.WristL1(() -> canFold.getAsBoolean())));
                 // Algea Positions//
-                algeaModeEnabled.and(buttonbord.button(7))
+                (BBLockout.negate()).and(algeaModeEnabled.and(buttonbord.button(7)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorA1(wristLimiter),
                                                 wrist.WristA1(() -> canFold.getAsBoolean())));
 
-                algeaModeEnabled.and(buttonbord.button(4))
+                (BBLockout.negate()).and(algeaModeEnabled.and(buttonbord.button(4)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()),
                                                 elevator.ElevatorA2(wristLimiter),
                                                 wrist.WristA2(() -> canFold
                                                                 .getAsBoolean())));
 
-                algeaModeEnabled.and(buttonbord.button(1))
+                (BBLockout.negate()).and(algeaModeEnabled.and(buttonbord.button(1)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorBarge(wristLimiter),
                                                 wrist.WristBarge(() -> canFold.getAsBoolean())));
 
-                algeaModeEnabled.and(buttonbord.button(11))
+                (BBLockout.negate()).and(algeaModeEnabled.and(buttonbord.button(11)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()),
                                                 elevator.ElevatorProcessor(wristLimiter),
                                                 wrist.WristProcessor(() -> canFold
                                                                 .getAsBoolean())));
 
-                algeaModeEnabled.and(buttonbord.button(9))
-                                .onTrue(Commands.sequence(wrist.WristSafety(
-                                                () -> canFold.getAsBoolean()),
-                                                elevator.ElevatorProcessor(wristLimiter),
-                                                wrist.WristProcessor(() -> canFold
-                                                                .getAsBoolean())));
+                /*
+                 * algeaModeEnabled.and(buttonbord.button(9))
+                 * .onTrue(Commands.sequence(wrist.WristSafety(
+                 * () -> canFold.getAsBoolean()),
+                 * elevator.ElevatorProcessor(wristLimiter),
+                 * wrist.WristProcessor(() -> canFold
+                 * .getAsBoolean())));
+                 */
 
                 joystick.button(5).or(joystick.button(6))
                                 .onTrue(climber.ManualClimber(() -> joystick.button(6).getAsBoolean(),
                                                 () -> joystick.button(5).getAsBoolean()));
 
-                buttonbord.button(12)
-                                .onTrue(Commands.parallel(wrist.ExitState(() -> canFold.getAsBoolean()),
-                                                elevator.ExitState(wristLimiter)));
+                RobotModeTriggers.teleop().whileTrue(vision.TelopVision());
+
+                // (reverseLimitHit).onTrue(elevator.Zero());
 
                 // Buttonboard button 8 toggles manual tray control for the intake
+
+                (BBLockout.negate()).and(joystick.button(7)).onTrue(Commands.sequence(wrist.WristSafety(
+                                () -> canFold.getAsBoolean()),
+                                elevator.ElevatorL1(wristLimiter),
+                                wrist.WristClimber(() -> canFold
+                                                .getAsBoolean())));
+
+                joystick.button(7)
+                                .toggleOnTrue(climber.TrayManualUp());
+
                 buttonbord.button(10)
-                                .toggleOnTrue(climber.TrayManual());
+                                .toggleOnTrue(climber.TrayManualDown());
 
         }
 
@@ -323,6 +414,7 @@ public class RobotContainer {
         // Autonomous command that is selected based on the chosen auto mode
         public Command getAutonomousCommand() {
                 /* Run the path selected from the auto chooser */
-                return null; // autoChooser.getSelected();
+                // return new PathPlannerAuto(autoChooser.getSelected());
+                return autoChooser.getSelected();
         }
 }
