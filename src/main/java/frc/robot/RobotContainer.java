@@ -111,6 +111,7 @@ public class RobotContainer {
         private final Trigger algeaModeEnabled;
         private final Trigger reverseLimitHit;
         private final Trigger BBLockout;
+        private final Trigger DontIntakeWrist;
 
         /* Some triggers related to elevator throttles (to be developed in Sprint 4) */
         /*
@@ -144,7 +145,7 @@ public class RobotContainer {
                 isDisabled = new Trigger(() -> DriverStation.isDisabled());
                 algeaModeEnabled = new Trigger(() -> getAlgeaMode());
                 reverseLimitHit = elevator.reverseLimitHit();
-
+                DontIntakeWrist = wrist.wristDontIntake();
                 // selector on the dashboard
 
                 // Define and register commands for the intake subsystem with different
@@ -286,14 +287,18 @@ public class RobotContainer {
                 // Endeffector command bindings, such as when to turn on intake or control trays
                 endEffector.setDefaultCommand(endEffector.nothing()); // Default is do nothing
                 // Coral Commands
-                algeaModeEnabled.negate().and(elevator.elevatorIntake().and(wrist.wristIntake()))
-                                .and(() -> RobotState.isTeleop())
+                algeaModeEnabled.negate().and((((elevator.elevatorIntake().and(wrist.wristIntake())))
+                                .and(() -> RobotState.isTeleop())).or(
+                                                (buttonbord
+                                                                .button(5))))
                                 .whileTrue(endEffector.IntakeCoral());// When algea mode is disabled and the elevator
                                                                       // and wrist are in the L1 position
 
                 // intake coral
 
-                algeaModeEnabled.negate().and(buttonbord.button(5)).whileTrue(endEffector.IntakeCoral());
+                algeaModeEnabled.negate().and(DontIntakeWrist.negate()).and(() -> RobotState
+                                .isTeleop()) // .and(buttonbord.button(5))
+                                .whileTrue(endEffector.IntakeCoral());
                 // When algea mode is diabled and button 5 is hit Intake coral manually
                 algeaModeEnabled.negate().and(buttonbord.button(2)).whileTrue(endEffector.shootCoral());
                 // When algea mode is diabled and button 2 is hit shoot coral
@@ -350,24 +355,24 @@ public class RobotContainer {
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorL1(wristLimiter),
                                                 wrist.WristL1(() -> canFold.getAsBoolean())));
                 // Algea Positions//
-                (BBLockout.negate()).and(algeaModeEnabled.and(buttonbord.button(7)))
+                (algeaModeEnabled.and(buttonbord.button(7)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorA1(wristLimiter),
                                                 wrist.WristA1(() -> canFold.getAsBoolean())));
 
-                (BBLockout.negate()).and(algeaModeEnabled.and(buttonbord.button(4)))
+                (algeaModeEnabled.and(buttonbord.button(4)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()),
                                                 elevator.ElevatorA2(wristLimiter),
                                                 wrist.WristA2(() -> canFold
                                                                 .getAsBoolean())));
 
-                (BBLockout.negate()).and(algeaModeEnabled.and(buttonbord.button(1)))
+                (algeaModeEnabled.and(buttonbord.button(1)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorBarge(wristLimiter),
                                                 wrist.WristBarge(() -> canFold.getAsBoolean())));
 
-                (BBLockout.negate()).and(algeaModeEnabled.and(buttonbord.button(11)))
+                (algeaModeEnabled.and(buttonbord.button(11)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()),
                                                 elevator.ElevatorProcessor(wristLimiter),

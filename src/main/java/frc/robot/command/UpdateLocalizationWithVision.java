@@ -42,7 +42,7 @@ public class UpdateLocalizationWithVision extends Command {
       if (aftpose.rawFiducials[0].ambiguity < 0.7) {
         {
 
-          drivetrain.addVisionMeasurement(aftpose.pose, aftpose.timestampSeconds, VecBuilder.fill(0.1, 0.1, 0.1));
+          drivetrain.addVisionMeasurement(aftpose.pose, aftpose.timestampSeconds, VecBuilder.fill(0.1, 0.1, 999999));
 
         }
       } else {
@@ -51,7 +51,7 @@ public class UpdateLocalizationWithVision extends Command {
     }
     if (bowpose != null) {
       if (bowpose.rawFiducials[0].ambiguity < 0.7) {
-        drivetrain.addVisionMeasurement(bowpose.pose, bowpose.timestampSeconds, VecBuilder.fill(0.1, 0.1, 0.1));
+        drivetrain.addVisionMeasurement(bowpose.pose, bowpose.timestampSeconds, VecBuilder.fill(0.1, 0.1, 9999999));
       }
     }
   }

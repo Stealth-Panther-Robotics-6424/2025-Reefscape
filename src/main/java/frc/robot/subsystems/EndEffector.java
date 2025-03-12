@@ -106,7 +106,12 @@ public class EndEffector extends SubsystemBase {
     // power (0.05) to prevent jam.
     if (!this.disBBValue() || !this.intakeBBValue()) {
       if (!this.disBBValue()) {
-        output = 0; // Stop the intake motor if the discharge sensor is not triggered.
+        if (this.intakeBBValue()) {
+
+          output = -0.05;
+        } else {
+          output = 0;
+        } // Stop the intake motor if the discharge sensor is not triggered.
       } else {
         output = 0.05; // Set a small power if the intake sensor is not triggered.
       }
@@ -187,7 +192,9 @@ public class EndEffector extends SubsystemBase {
 
   // Dynamic power intake based on sensor input
   public Command IntakeCoral() {
-    return createIntakeCommand(() -> intakeBeamStop(.95)).until(() -> !this.disBBValue());
+    return createIntakeCommand(() -> intakeBeamStop(.95)).until(
+        () -> !this.disBBValue());
+
   }
 
   // Command to toggle the intake solenoid, which controls the intake mechanism's

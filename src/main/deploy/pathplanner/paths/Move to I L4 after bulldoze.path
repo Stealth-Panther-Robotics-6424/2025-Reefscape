@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2952460106382977,
-        "y": 1.0027593085106377
+        "x": 7.242380136986301,
+        "y": 6.158647260273973
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.2054188829787233,
-        "y": 0.7810505319148934
+        "x": 8.242380136986302,
+        "y": 6.158647260273973
       },
       "isLocked": false,
-      "linkedName": "Sitting at Right Side Intake"
+      "linkedName": "end of bulldoze"
     },
     {
       "anchor": {
-        "x": 3.629022606382979,
-        "y": 2.939793882978723
+        "x": 5.344348404253177,
+        "y": 5.1218750000051
       },
       "prevControl": {
-        "x": 3.115591755319149,
-        "y": 2.274667553191489
+        "x": 5.960401486444958,
+        "y": 5.752953767128387
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Sitting at C L4"
+      "linkedName": "Sitting at I position"
     }
   ],
   "rotationTargets": [],
@@ -41,7 +41,7 @@
   ],
   "globalConstraints": {
     "maxVelocity": 1.5,
-    "maxAcceleration": 0.8,
+    "maxAcceleration": 1.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -49,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 58.29857033049423
+    "rotation": -120.96375653160389
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 54.46232220802563
+    "rotation": 180.0
   },
   "useDefaultConstraints": false
 }

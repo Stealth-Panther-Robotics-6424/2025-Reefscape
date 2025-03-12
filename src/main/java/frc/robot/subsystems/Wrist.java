@@ -168,6 +168,13 @@ public class Wrist extends SubsystemBase {
     // 0.42
   }
 
+  public Trigger wristDontIntake() {
+
+    return new Trigger(() -> this.getWristPosition() <= .1);
+    // Create a trigger that activates when the wrist position is above or equal to
+    // 0.42
+  }
+
   // Method to retrieve the current wrist position from the CANcoder sensor
   public double getWristPosition() {
     return (wristCanCoder.getAbsolutePosition().getValueAsDouble());
