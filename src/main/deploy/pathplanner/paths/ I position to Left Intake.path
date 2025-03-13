@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.5193816489340275,
-        "y": 6.102061170217866
+        "x": 5.889673563880976,
+        "y": 6.701888176065618
       },
       "isLocked": false,
       "linkedName": "Sitting at I position"
@@ -20,20 +20,15 @@
         "y": 7.047240691489361
       },
       "prevControl": {
-        "x": 2.0024569988835346,
-        "y": 6.511317362621884
+        "x": 3.220953027636047,
+        "y": 6.305291786018343
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "sitting at left intake"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.2539370078740162,
-      "rotationDegrees": -74.47145583336425
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
@@ -46,7 +41,7 @@
   ],
   "globalConstraints": {
     "maxVelocity": 3.0,
-    "maxAcceleration": 1.5,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 500.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

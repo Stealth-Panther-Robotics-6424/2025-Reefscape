@@ -56,6 +56,7 @@ public class RobotContainer {
         private ShuffleboardTab DS_MainTab = Shuffleboard.getTab("Main");
         private GenericEntry DS_CodeVersion = DS_MainTab.add("Code Version", Constants.codeVersion).getEntry();
         private GenericEntry DS_AlgeaMode = DS_MainTab.add("Algea Mode", false).getEntry();
+        private GenericEntry DS_DriveMode = DS_MainTab.add("Drive Mode", false).getEntry();
 
         // Define maximum speed and angular rate based on tuner constants, converted
         // into appropriate units
@@ -260,15 +261,18 @@ public class RobotContainer {
                 );
 
                 // Joystick button to reset field-centric heading
-                joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+                joystick.button(3).and(joystick.button(2))
+                                .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
                 // Joystick button to apply the brake to stop all swerve drive modules
                 joystick.button(4).whileTrue(drivetrain.applyRequest(() -> brake));
 
                 // Button to point the wheels in a specific direction based on joystick input
-                joystick.button(3).whileTrue(drivetrain.applyRequest(
-                                () -> point.withModuleDirection(
-                                                new Rotation2d(-joystick.getRawAxis(1), -joystick.getRawAxis(0)))));
+                /*
+                 * joystick.button(3).whileTrue(drivetrain.applyRequest(
+                 * () -> point.withModuleDirection(
+                 * new Rotation2d(-joystick.getRawAxis(1), -joystick.getRawAxis(0)))));
+                 */
 
                 // Run SysId routines when specific button combinations are pressed
                 /*
