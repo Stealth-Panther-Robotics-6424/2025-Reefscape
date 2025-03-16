@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2952460106382977,
-        "y": 1.0027593085106377
+        "x": 1.3185837765957447,
+        "y": 1.0494348404255311
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.295246010638298,
-        "y": 1.0027593085106377
+        "x": 2.318583776595745,
+        "y": 1.0494348404255311
       },
       "isLocked": false,
       "linkedName": "Sitting at Right Side Intake"
@@ -41,7 +41,7 @@
   ],
   "globalConstraints": {
     "maxVelocity": 2.0,
-    "maxAcceleration": 1.5,
+    "maxAcceleration": 1.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

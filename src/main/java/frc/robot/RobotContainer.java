@@ -27,6 +27,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -292,11 +293,12 @@ public class RobotContainer {
                 endEffector.setDefaultCommand(endEffector.nothing()); // Default is do nothing
                 // Coral Commands
                 algeaModeEnabled.negate().and((((elevator.elevatorIntake().and(wrist.wristIntake())))
-                                .and(() -> RobotState.isTeleop())).or(
-                                                (buttonbord
-                                                                .button(5))))
+                                .and(() -> RobotState.isTeleop())))
                                 .whileTrue(endEffector.IntakeCoral());// When algea mode is disabled and the elevator
                                                                       // and wrist are in the L1 position
+
+                (buttonbord.button(5))
+                                .whileTrue(endEffector.IntakeCoral());
 
                 // intake coral
 
@@ -402,17 +404,16 @@ public class RobotContainer {
 
                 // Buttonboard button 8 toggles manual tray control for the intake
 
-                (BBLockout.negate()).and(joystick.button(7)).onTrue(Commands.sequence(wrist.WristSafety(
+                (BBLockout.negate()).and(buttonbord.button(12)).onTrue(Commands.sequence(wrist.WristSafety(
                                 () -> canFold.getAsBoolean()),
                                 elevator.ElevatorL1(wristLimiter),
                                 wrist.WristClimber(() -> canFold
                                                 .getAsBoolean())));
 
-                joystick.button(7)
+                buttonbord.button(6)
                                 .toggleOnTrue(climber.TrayManualUp());
 
-                buttonbord.button(10)
-                                .toggleOnTrue(climber.TrayManualDown());
+                joystick.button(7).toggleOnTrue(climber.TrayManualDown());
 
         }
 
