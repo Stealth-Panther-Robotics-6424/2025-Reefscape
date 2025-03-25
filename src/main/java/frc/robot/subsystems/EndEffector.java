@@ -185,6 +185,22 @@ public class EndEffector extends SubsystemBase {
     return createIntakeCommand(.2);
   }
 
+  public Command Intake() {
+    return createIntakeCommand(1).until(() -> !this.intakeBBValue());
+  }
+
+  public Command FeedForward() {
+    return createIntakeCommand(0.05).until(() -> !this.disBBValue());
+  }
+
+  public Command FeedBack() {
+    return createIntakeCommand(-0.05).until(() -> this.disBBValue());
+  }
+
+  public Command Hold() {
+    return createIntakeCommand(0.0).withTimeout(.2);
+  }
+
   // Command to stop the intake system
   public Command nothing() {
     return createIntakeCommand(0.0);
@@ -194,6 +210,12 @@ public class EndEffector extends SubsystemBase {
   public Command IntakeCoral() {
     return createIntakeCommand(() -> intakeBeamStop(.95)).until(
         () -> !this.disBBValue());
+
+  }
+
+  public Command TeleIntakeCoral(Trigger dontIntakeWrist) {
+
+    return createIntakeCommand(() -> intakeBeamStop(.95)).until(dontIntakeWrist);
 
   }
 

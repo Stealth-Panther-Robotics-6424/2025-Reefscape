@@ -294,11 +294,21 @@ public class RobotContainer {
                 // Coral Commands
                 algeaModeEnabled.negate().and((((elevator.elevatorIntake().and(wrist.wristIntake())))
                                 .and(() -> RobotState.isTeleop())))
-                                .whileTrue(endEffector.IntakeCoral());// When algea mode is disabled and the elevator
-                                                                      // and wrist are in the L1 position
+                                .onTrue(Commands.sequence(endEffector.Intake(), endEffector.Hold(),
+                                                endEffector.FeedForward(), endEffector.FeedBack(),
+                                                endEffector.FeedForward(),
+                                                endEffector.TeleIntakeCoral(DontIntakeWrist)));// When algea
+                // mode is
+                // disabled
+                // and the
+                // elevator
+                // and wrist are in the L1 position
 
                 (buttonbord.button(5))
-                                .whileTrue(endEffector.IntakeCoral());
+                                .onTrue(Commands.sequence(endEffector.Intake(), endEffector.Hold(),
+                                                endEffector.FeedForward(), endEffector.FeedBack(),
+                                                endEffector.FeedForward(),
+                                                endEffector.TeleIntakeCoral(DontIntakeWrist)));
 
                 // intake coral
 
