@@ -320,7 +320,7 @@ public class Elevator extends SubsystemBase {
           this.setElevatorMotor(0);
         }, // Nothing new runs when interrupted
 
-        () -> this.elevatorAtSetpoint(), // Check if the elevator has reached L1.
+        () -> (this.elevatorAtSetpoint()), // Check if the elevator has reached L1.
 
         this);
   }
@@ -347,7 +347,7 @@ public class Elevator extends SubsystemBase {
   // Command to move the elevator to the L4 position OG (113.7). New(64.97)
   public Command ElevatorL4(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 66);
+    return MovetoPosition(wristLimiter, 66).until(() -> elevatorTalonStrb.getForwardLimit().getValueAsDouble() == 1);
   }
 
   public Command ElevatorA1(BooleanSupplier wristLimiter) {
@@ -367,7 +367,10 @@ public class Elevator extends SubsystemBase {
 
   public Command ElevatorBarge(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 66.25); // OG (114.4) New (65.37)
+    return MovetoPosition(wristLimiter, 66.25).until(() -> elevatorTalonStrb.getForwardLimit().getValueAsDouble() == 1); // OG
+                                                                                                                         // (114.4)
+                                                                                                                         // New
+                                                                                                                         // (65.37)
   }
 
   // Command to exit the current elevator state and maintain its position.

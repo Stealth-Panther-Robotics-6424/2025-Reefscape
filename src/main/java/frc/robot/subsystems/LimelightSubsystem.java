@@ -88,7 +88,7 @@ public class LimelightSubsystem extends SubsystemBase {
      */
     public boolean getTV() {
         return LimelightHelpers.getTV(limelight);
-    }   
+    }
 
     /**
      * Returns the horizontal offset (Tx) if a target is visible.
@@ -155,12 +155,12 @@ public class LimelightSubsystem extends SubsystemBase {
     public double[] getTargetInRobotSpace() {
         return LimelightHelpers.getTargetPose_RobotSpace(limelight);
     }
-    
+
     // Helper method to cache the target pose for the current periodic update
     private double[] getCachedTargetPose() {
         return getTargetInRobotSpace();
     }
-    
+
     // These methods extract individual components from the target pose array.
     public double getTagToRobotX() {
         double[] targetPose = getCachedTargetPose();
@@ -175,18 +175,18 @@ public class LimelightSubsystem extends SubsystemBase {
     public double getTagToRobotZ() {
         double[] targetPose = getCachedTargetPose();
         return (targetPose.length > 2) ? targetPose[2] : 0.0;
-    }   
-    
+    }
+
     public double getTagToRobotYaw() {
         double[] targetPose = getCachedTargetPose();
         return (targetPose.length > 3) ? targetPose[3] : 0.0;
     }
-    
+
     public double getTagToRobotPitch() {
         double[] targetPose = getCachedTargetPose();
         return (targetPose.length > 4) ? targetPose[4] : 0.0;
     }
-    
+
     public double getTagToRobotRoll() {
         double[] targetPose = getCachedTargetPose();
         return (targetPose.length > 5) ? targetPose[5] : 0.0;
@@ -196,11 +196,11 @@ public class LimelightSubsystem extends SubsystemBase {
     public void periodic() {
         // Update target pose values from the NetworkTables
         double[] targetPose = getTargetInRobotSpace();
-        
+
         dsTx.setDouble(getTx());
         dsTy.setDouble(getTy());
         dsConfidence.setDouble(getConfidence());
-        
+
         if (targetPose.length >= 6) {
             dsTargetPoseRobotX.setDouble(targetPose[0]);
             dsTargetPoseRobotY.setDouble(targetPose[1]);
@@ -216,10 +216,10 @@ public class LimelightSubsystem extends SubsystemBase {
             dsTargetPoseRobotPitch.setDouble(0);
             dsTargetPoseRobotRoll.setDouble(0);
         }
-        
+
         // Retrieve the complete vision pose estimate.
         LimelightHelpers.PoseEstimate visionPose = getVisionPose();
-        
+
         // Check if there are any tags detected
         if (visionPose.tagCount > 0) {
             dsVisionPose.setString(visionPose.toString());
@@ -228,7 +228,7 @@ public class LimelightSubsystem extends SubsystemBase {
             dsPoseX.setDouble(pose.getTranslation().getX());
             dsPoseY.setDouble(pose.getTranslation().getY());
             dsPoseTheta.setDouble(pose.getRotation().getDegrees());
-            
+
             dsPoseTimestamp.setDouble(visionPose.timestampSeconds);
             dsPoseLatency.setDouble(visionPose.latency);
             dsTagCount.setDouble(visionPose.tagCount);

@@ -27,6 +27,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -56,6 +57,7 @@ public class RobotContainer {
         private ShuffleboardTab DS_MainTab = Shuffleboard.getTab("Main");
         private GenericEntry DS_CodeVersion = DS_MainTab.add("Code Version", Constants.codeVersion).getEntry();
         private GenericEntry DS_AlgeaMode = DS_MainTab.add("Algea Mode", false).getEntry();
+        private GenericEntry DS_DriveMode = DS_MainTab.add("Drive Mode", false).getEntry();
 
         // Define maximum speed and angular rate based on tuner constants, converted
         // into appropriate units
@@ -111,6 +113,7 @@ public class RobotContainer {
         private final Trigger algeaModeEnabled;
         private final Trigger reverseLimitHit;
         private final Trigger BBLockout;
+        private final Trigger DontIntakeWrist;
 
         /* Some triggers related to elevator throttles (to be developed in Sprint 4) */
         /*
@@ -144,7 +147,7 @@ public class RobotContainer {
                 isDisabled = new Trigger(() -> DriverStation.isDisabled());
                 algeaModeEnabled = new Trigger(() -> getAlgeaMode());
                 reverseLimitHit = elevator.reverseLimitHit();
-
+                DontIntakeWrist = wrist.wristDontIntake();
                 // selector on the dashboard
 
                 // Define and register commands for the intake subsystem with different
@@ -259,15 +262,18 @@ public class RobotContainer {
                 );
 
                 // Joystick button to reset field-centric heading
-                joystick.button(2).onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+                joystick.button(3).and(joystick.button(2))
+                                .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
                 // Joystick button to apply the brake to stop all swerve drive modules
                 joystick.button(4).whileTrue(drivetrain.applyRequest(() -> brake));
 
                 // Button to point the wheels in a specific direction based on joystick input
-                joystick.button(3).whileTrue(drivetrain.applyRequest(
-                                () -> point.withModuleDirection(
-                                                new Rotation2d(-joystick.getRawAxis(1), -joystick.getRawAxis(0)))));
+                /*
+                 * joystick.button(3).whileTrue(drivetrain.applyRequest(
+                 * () -> point.withModuleDirection(
+                 * new Rotation2d(-joystick.getRawAxis(1), -joystick.getRawAxis(0)))));
+                 */
 
                 // Run SysId routines when specific button combinations are pressed
                 /*
@@ -286,14 +292,29 @@ public class RobotContainer {
                 // Endeffector command bindings, such as when to turn on intake or control trays
                 endEffector.setDefaultCommand(endEffector.nothing()); // Default is do nothing
                 // Coral Commands
-                algeaModeEnabled.negate().and(elevator.elevatorIntake().and(wrist.wristIntake()))
-                                .and(() -> RobotState.isTeleop())
-                                .whileTrue(endEffector.IntakeCoral());// When algea mode is disabled and the elevator
-                                                                      // and wrist are in the L1 position
+                algeaModeEnabled.negate().and((((elevator.elevatorIntake().and(wrist.wristIntake())))
+                                .and(() -> RobotState.isTeleop())))
+                                .onTrue(Commands.sequence(endEffector.Intake(), endEffector.Hold(),
+                                                endEffector.FeedForward(), endEffector.FeedBack(),
+                                                endEffector.FeedForward(),
+                                                endEffector.TeleIntakeCoral(DontIntakeWrist)));// When algea
+                // mode is
+                // disabled
+                // and the
+                // elevator
+                // and wrist are in the L1 position
+
+                (buttonbord.button(5))
+                                .onTrue(Commands.sequence(endEffector.Intake(), endEffector.Hold(),
+                                                endEffector.FeedForward(), endEffector.FeedBack(),
+                                                endEffector.FeedForward(),
+                                                endEffector.TeleIntakeCoral(DontIntakeWrist)));
 
                 // intake coral
 
-                algeaModeEnabled.negate().and(buttonbord.button(5)).whileTrue(endEffector.IntakeCoral());
+                algeaModeEnabled.negate().and(DontIntakeWrist.negate()).and(() -> RobotState
+                                .isTeleop()) // .and(buttonbord.button(5))
+                                .whileTrue(endEffector.IntakeCoral());
                 // When algea mode is diabled and button 5 is hit Intake coral manually
                 algeaModeEnabled.negate().and(buttonbord.button(2)).whileTrue(endEffector.shootCoral());
                 // When algea mode is diabled and button 2 is hit shoot coral
@@ -350,24 +371,24 @@ public class RobotContainer {
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorL1(wristLimiter),
                                                 wrist.WristL1(() -> canFold.getAsBoolean())));
                 // Algea Positions//
-                (BBLockout.negate()).and(algeaModeEnabled.and(buttonbord.button(7)))
+                (algeaModeEnabled.and(buttonbord.button(7)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorA1(wristLimiter),
                                                 wrist.WristA1(() -> canFold.getAsBoolean())));
 
-                (BBLockout.negate()).and(algeaModeEnabled.and(buttonbord.button(4)))
+                (algeaModeEnabled.and(buttonbord.button(4)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()),
                                                 elevator.ElevatorA2(wristLimiter),
                                                 wrist.WristA2(() -> canFold
                                                                 .getAsBoolean())));
 
-                (BBLockout.negate()).and(algeaModeEnabled.and(buttonbord.button(1)))
+                (algeaModeEnabled.and(buttonbord.button(1)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorBarge(wristLimiter),
                                                 wrist.WristBarge(() -> canFold.getAsBoolean())));
 
-                (BBLockout.negate()).and(algeaModeEnabled.and(buttonbord.button(11)))
+                (algeaModeEnabled.and(buttonbord.button(11)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()),
                                                 elevator.ElevatorProcessor(wristLimiter),
@@ -393,17 +414,16 @@ public class RobotContainer {
 
                 // Buttonboard button 8 toggles manual tray control for the intake
 
-                (BBLockout.negate()).and(joystick.button(7)).onTrue(Commands.sequence(wrist.WristSafety(
+                (BBLockout.negate()).and(buttonbord.button(12)).onTrue(Commands.sequence(wrist.WristSafety(
                                 () -> canFold.getAsBoolean()),
                                 elevator.ElevatorL1(wristLimiter),
                                 wrist.WristClimber(() -> canFold
                                                 .getAsBoolean())));
 
-                joystick.button(7)
+                buttonbord.button(6)
                                 .toggleOnTrue(climber.TrayManualUp());
 
-                buttonbord.button(10)
-                                .toggleOnTrue(climber.TrayManualDown());
+                joystick.button(7).toggleOnTrue(climber.TrayManualDown());
 
         }
 
