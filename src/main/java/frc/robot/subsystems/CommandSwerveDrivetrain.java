@@ -167,10 +167,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         );
 
     }
+  
+  
 
-    public Command BargeAid(DoubleSupplier y) {
+    public Command BargeAid(double y) {
         PathConstraints constraints = this.bargeConstraints;
-        Pose2d targetPose = new Pose2d(7.2, 6 - y.getAsDouble(), Rotation2d.fromDegrees(180));
+        Pose2d targetPose = new Pose2d(7.2, 6 - y, Rotation2d.fromDegrees(180));
         return (DrivetoPose(targetPose, constraints));
 
     }
@@ -377,27 +379,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // // fine adjust
     // double dtheta = targetPose.getRotation().getRadians() -
     // pose.getRotation().getRadians() - rotAxis * 0.5; // find
-    // // the
-    // // error
-    // // in
-    // // angel
-    // // in
-    // // radians
-    // // for
-    // // theta
-    // // and
-    // // then
-    // // add
-    // // a
-    // // joystick
-    // // adjustment
-    // // to
-    // // the
-    // // angle
-    // // to
-    // // fine
-    // // adjust
-
+ 
     // // P control for x, y, and theta hard coded to allow for easier use
     // double xSpeed = dx * 0.1;
     // double ySpeed = dy * 0.1;

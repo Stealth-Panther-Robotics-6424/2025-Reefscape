@@ -41,6 +41,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.command.UpdateLocalizationWithVision;
+import frc.robot.command.holdXPos;
 import frc.robot.command.MergeVisionOdometryCommand;
 
 import frc.robot.generated.TunerConstants;
@@ -436,8 +437,16 @@ public class RobotContainer {
 
                 joystick.button(7).toggleOnTrue(climber.TrayManualDown());
 
-                joystick.button(1).whileTrue(
-                                drivetrain.BargeAid(() -> joystick.getRawAxis(0)));
+                joystick.button(1).whileTrue(Commands.sequence(
+                                drivetrain.BargeAid(drivetrain.getState().Pose.getY()),
+                                new holdXPos(drivetrain,
+                                drivetrain.getState().Pose.getX(),
+                                             MaxAngularRate,
+                                             MaxSpeed,
+                                             ()->-joystick.getRawAxis(0),
+                                             ()->-joystick.getRawAxis(4),
+                                             ()->throttle(3),
+                                             ()->elevator.elevatorThrottle())));
 
         }
 
