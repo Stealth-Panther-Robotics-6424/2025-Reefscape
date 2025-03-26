@@ -96,7 +96,9 @@ public class RobotContainer {
         private final Elevator elevator; // Elevator subsystem for vertical movements
         private final EndEffector endEffector; // Intake subsystem for grabbing objects
         private final Climber climber; // Intake subsystem for grabbing objects
-        private final Vision vision; // Intake subsystem for grabbing objects
+        private final Vision vision;
+
+        // Intake subsystem for grabbing objects
 
         private boolean AlgeaMode = false;
 
@@ -114,6 +116,7 @@ public class RobotContainer {
         private final Trigger reverseLimitHit;
         private final Trigger BBLockout;
         private final Trigger DontIntakeWrist;
+        private final Trigger BargePos;
 
         /* Some triggers related to elevator throttles (to be developed in Sprint 4) */
         /*
@@ -148,6 +151,7 @@ public class RobotContainer {
                 algeaModeEnabled = new Trigger(() -> getAlgeaMode());
                 reverseLimitHit = elevator.reverseLimitHit();
                 DontIntakeWrist = wrist.wristDontIntake();
+                BargePos = elevator.bargePosTrigger();
                 // selector on the dashboard
 
                 // Define and register commands for the intake subsystem with different
@@ -331,7 +335,14 @@ public class RobotContainer {
                 // by applying a 3% back spin
 
                 algeaModeEnabled.and(buttonbord.button(2)).and(buttonbord.button(5).negate())
+                                .and(BargePos.negate())
                                 .whileTrue(endEffector.ShootAlgea());
+
+                algeaModeEnabled.and(buttonbord.button(2)).and(buttonbord.button(5).negate())
+                                .and(BargePos)
+                                .onTrue((Commands.parallel(wrist.WristBargeShoot(() -> canFold
+                                                .getAsBoolean()), endEffector.ShootAlgea())));
+
                 // When algea mode is enabled and button 2 is hit and button 5 is not hit shoot
                 // algea
 
@@ -408,7 +419,7 @@ public class RobotContainer {
                                 .onTrue(climber.ManualClimber(() -> joystick.button(6).getAsBoolean(),
                                                 () -> joystick.button(5).getAsBoolean()));
 
-                RobotModeTriggers.teleop().whileTrue(vision.TelopVision());
+                // RobotModeTriggers.teleop().whileTrue(vision.TelopVision());
 
                 // (reverseLimitHit).onTrue(elevator.Zero());
 
@@ -424,6 +435,9 @@ public class RobotContainer {
                                 .toggleOnTrue(climber.TrayManualUp());
 
                 joystick.button(7).toggleOnTrue(climber.TrayManualDown());
+
+                joystick.button(1).whileTrue(
+                                drivetrain.BargeAid(() -> joystick.getRawAxis(0)));
 
         }
 

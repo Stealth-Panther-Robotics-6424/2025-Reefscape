@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.commands.PathfindingCommand;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,6 +19,9 @@ public class Robot extends TimedRobot {
   public Robot() {
     m_robotContainer = new RobotContainer();
     SmartDashboard.putData(CommandScheduler.getInstance());
+
+    PathfindingCommand.warmupCommand().schedule(); // This command will not control your robot, it will simply run
+                                                   // through a full pathfinding command to warm up the library.
   }
 
   @Override
@@ -73,6 +78,7 @@ public class Robot extends TimedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
+
   }
 
   @Override

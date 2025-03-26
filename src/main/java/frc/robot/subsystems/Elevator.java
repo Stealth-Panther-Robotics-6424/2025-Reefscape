@@ -208,6 +208,15 @@ public class Elevator extends SubsystemBase {
 
   }
 
+  public Trigger bargePosTrigger() { // this method sets whether the wrist can fold back based on the elevator
+    // position this prevents folding back into the crossmembers
+    // Original values in order 26, 50.5, 59, 104
+    // new values in order 14.86, 28.86, 33.71, 59.43
+    return new Trigger(
+        () -> ((elevatorTalonStrb.getForwardLimit().getValueAsDouble() == 1) || (this.getElevatorPosition() >= 62)));
+
+  }
+
   public void zeroElevator() // Check if the built-in reverse limit
   {
     {
@@ -402,6 +411,7 @@ public class Elevator extends SubsystemBase {
     this.DS_ElevatorSetpoint.setDouble(elevatorController.getSetpoint());
     this.DS_canLift.setBoolean(this.canLift);
     SmartDashboard.putData(CommandScheduler.getInstance());
+    SmartDashboard.putBoolean("BargePos", this.bargePosTrigger().getAsBoolean());
     // The periodic method is called to regularly update the robot's status.
   }
 
