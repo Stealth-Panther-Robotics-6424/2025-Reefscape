@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3185837765957447,
-        "y": 1.0494348404255311
+        "x": 1.1269263698630136,
+        "y": 1.0649400684931505
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.318583776595745,
-        "y": 1.0494348404255311
+        "x": 2.126926369863014,
+        "y": 1.0649400684931505
       },
       "isLocked": false,
       "linkedName": "Sitting at Right Side Intake"

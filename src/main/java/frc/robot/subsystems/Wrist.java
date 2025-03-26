@@ -270,6 +270,24 @@ public class Wrist extends SubsystemBase {
         this);
   }
 
+  public Command BargeShotPullback(BooleanSupplier canFold) {
+    return new FunctionalCommand(
+        () -> {
+          this.safeFold = canFold.getAsBoolean(); // Set wrist to position L1 (0.445)
+        },
+        () -> {
+          this.setWristMotor(-0.5);
+
+        },
+        interrupted -> {
+          this.setWristPID(this.getWristPosition());
+          this.setWristMotor(0);
+
+        }, // Interrupted: No specific action when interrupted
+        () -> this.getWristPosition() <= 0.06, // Finish condition: Check if wrist has reached L1 position
+        this);
+  }
+
   // Command to start the wrist motor but with no action (used for state
   // transitions)
   public Command startWristCommand() { // This command makes the wrist hold its starting position
@@ -280,7 +298,7 @@ public class Wrist extends SubsystemBase {
 
   // Command to ensure the wrist is moved to a safe position
   public Command WristSafety(BooleanSupplier canFold) {
-    return wristCommandFactory(canFold, 0.03).until(() -> this.getWristPosition() < 0.06); // this command makes
+    return wristCommandFactory(canFold, 0.05).until(() -> this.getWristPosition() < 0.08); // this command makes
     // sure the wrist is in an orientation that can't crash
   }
 

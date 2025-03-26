@@ -36,6 +36,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -341,8 +343,15 @@ public class RobotContainer {
 
                 algeaModeEnabled.and(buttonbord.button(2)).and(buttonbord.button(5).negate())
                                 .and(BargePos)
-                                .onTrue((Commands.parallel(wrist.WristBargeShoot(() -> canFold
-                                                .getAsBoolean()), endEffector.ShootAlgea())));
+                                .onTrue(Commands.sequence(wrist.BargeShotPullback(() -> canFold
+                                                .getAsBoolean()), elevator.ElevatorBarge(
+                                                                wristLimiter),
+                                                (Commands.parallel(wrist.WristBargeShoot(() -> canFold
+                                                                .getAsBoolean()),
+                                                                Commands.sequence(
+                                                                                endEffector.IntakeAlgea()
+                                                                                                .withTimeout(0.1),
+                                                                                endEffector.ShootAlgea())))));
 
                 // When algea mode is enabled and button 2 is hit and button 5 is not hit shoot
                 // algea
@@ -368,8 +377,13 @@ public class RobotContainer {
                 // presses
                 (BBLockout.negate()).and(algeaModeEnabled.negate().and(buttonbord.button(1)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
-                                                () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
-                                                wrist.WristL4(() -> canFold.getAsBoolean())));
+                                                () -> canFold.getAsBoolean()),
+                                                Commands.parallel(elevator.ElevatorL4(
+                                                                wristLimiter),
+                                                                Commands.sequence(new WaitUntilCommand(() -> elevator
+                                                                                .getElevatorPosition() >= 56),
+                                                                                wrist.WristL4(() -> canFold
+                                                                                                .getAsBoolean())))));
                 (BBLockout.negate()).and(algeaModeEnabled.negate().and(buttonbord.button(4)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorL3(wristLimiter),
@@ -397,8 +411,14 @@ public class RobotContainer {
 
                 (algeaModeEnabled.and(buttonbord.button(1)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
-                                                () -> canFold.getAsBoolean()), elevator.ElevatorBarge(wristLimiter),
-                                                wrist.WristBarge(() -> canFold.getAsBoolean())));
+                                                () -> canFold.getAsBoolean()),
+                                                Commands.parallel(
+                                                                elevator.ElevatorBarge(
+                                                                                wristLimiter),
+                                                                Commands.sequence(new WaitUntilCommand(() -> elevator
+                                                                                .getElevatorPosition() >= 56),
+                                                                                wrist.WristBarge(() -> canFold
+                                                                                                .getAsBoolean())))));
 
                 (algeaModeEnabled.and(buttonbord.button(11)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
@@ -438,15 +458,15 @@ public class RobotContainer {
                 joystick.button(7).toggleOnTrue(climber.TrayManualDown());
 
                 joystick.button(1).whileTrue(Commands.sequence(
-                                drivetrain.BargeAid(drivetrain.getState().Pose.getY()),
+                                drivetrain.BargeAid(),
                                 new holdXPos(drivetrain,
-                                drivetrain.getState().Pose.getX(),
-                                             MaxAngularRate,
-                                             MaxSpeed,
-                                             ()->-joystick.getRawAxis(0),
-                                             ()->-joystick.getRawAxis(4),
-                                             ()->throttle(3),
-                                             ()->elevator.elevatorThrottle())));
+                                                8.1,
+                                                MaxSpeed,
+                                                MaxAngularRate,
+                                                () -> -joystick.getRawAxis(0),
+                                                () -> -joystick.getRawAxis(4),
+                                                () -> throttle(3),
+                                                () -> elevator.elevatorThrottle(), 180)));
 
         }
 
