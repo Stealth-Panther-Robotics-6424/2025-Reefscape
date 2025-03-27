@@ -298,7 +298,7 @@ public class Wrist extends SubsystemBase {
 
   // Command to ensure the wrist is moved to a safe position
   public Command WristSafety(BooleanSupplier canFold) {
-    return wristCommandFactory(canFold, 0.05).until(() -> this.getWristPosition() < 0.08); // this command makes
+    return wristCommandFactory(canFold, 0.03).until(() -> this.getWristPosition() < 0.06); // this command makes
     // sure the wrist is in an orientation that can't crash
   }
 

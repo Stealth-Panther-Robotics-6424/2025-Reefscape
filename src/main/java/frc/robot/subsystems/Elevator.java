@@ -327,7 +327,7 @@ public class Elevator extends SubsystemBase {
         },
 
         interrupted -> {
-
+          this.setElevatorPID(this.getElevatorPosition());
           this.canLift = wristLimiter.getAsBoolean();
           this.setElevatorMotor(0);
         }, // Nothing new runs when interrupted

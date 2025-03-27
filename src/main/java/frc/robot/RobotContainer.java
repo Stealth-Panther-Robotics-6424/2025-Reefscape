@@ -169,9 +169,14 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Intake Algea", endEffector.IntakeAlgea().withTimeout(.5));
                 NamedCommands.registerCommand("Hold Algea", endEffector.HoldAlgea());
 
-                new EventTrigger("L4").onTrue((Commands.sequence(wrist.WristSafety(
-                                () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
-                                wrist.WristL4(() -> canFold.getAsBoolean()))));
+                new EventTrigger("L4").onTrue(Commands.sequence(wrist.WristSafety(
+                                () -> canFold.getAsBoolean()),
+                                Commands.parallel(elevator.ElevatorL4(
+                                                wristLimiter),
+                                                Commands.sequence(new WaitUntilCommand(() -> elevator
+                                                                .getElevatorPosition() >= 56),
+                                                                wrist.WristL4(() -> canFold
+                                                                                .getAsBoolean())))));
                 new EventTrigger("L1").onTrue(Commands.sequence(wrist.WristSafety(
                                 () -> canFold.getAsBoolean()), elevator.ElevatorL1(wristLimiter),
                                 wrist.WristL1(() -> canFold.getAsBoolean())));
@@ -267,6 +272,29 @@ public class RobotContainer {
                                                                                 // negative
                                                                                 // X (left)
                 );
+
+                joystick.pov(90).whileTrue((drivetrain.applyRequest(() -> robotCentricDrive
+                                .withVelocityX(0) // Drive forward with
+                                // negative Y (forward)
+                                .withVelocityY(MaxSpeed * -0.1 * throttle(
+                                                3)) // Drive left with
+                                                    // negative X (left)
+                                .withRotationalRate(0))));
+
+                joystick.pov(270).whileTrue((drivetrain.applyRequest(() -> robotCentricDrive
+                                .withVelocityX(0) // Drive forward with
+                                // negative Y (forward)
+                                .withVelocityY(MaxSpeed * 0.1 * throttle(
+                                                3)) // Drive left with
+                                                    // negative X (left)
+                                .withRotationalRate(0))));
+                joystick.pov(0).whileTrue((drivetrain.applyRequest(() -> robotCentricDrive
+                                .withVelocityX(MaxSpeed * 0.2 * throttle(
+                                                3)) // Drive forward with
+                                // negative Y (forward)
+                                .withVelocityY(0) // Drive left with
+                                                  // negative X (left)
+                                .withRotationalRate(0))));
 
                 // Joystick button to reset field-centric heading
                 joystick.button(3).and(joystick.button(2))

@@ -7,12 +7,6 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right Bulldozer"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
             "pathName": "Bulldoze to E"
           }
         },
@@ -25,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "E L4 to Intake"
+            "pathName": "E to Intake"
           }
         },
         {
@@ -49,7 +43,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "C L4 to Right Side Intake"
+            "pathName": "C to Intake "
           }
         },
         {

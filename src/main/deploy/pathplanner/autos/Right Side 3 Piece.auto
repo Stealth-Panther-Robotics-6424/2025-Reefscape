@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "E L4 to Intake"
+            "pathName": null
           }
         },
         {
@@ -43,7 +43,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "C L4 to Right Side Intake"
+            "pathName": null
           }
         },
         {

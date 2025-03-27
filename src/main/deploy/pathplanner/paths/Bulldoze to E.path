@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 6.954654255319149,
-        "y": 1.90126329787234
+        "x": 7.118018617021277,
+        "y": 1.8895944148936166
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.947040310219065,
-        "y": 1.9440891516704994
+        "x": 6.110404671921193,
+        "y": 1.932420268691776
       },
       "isLocked": false,
       "linkedName": "End of Right Bulldozer move"
