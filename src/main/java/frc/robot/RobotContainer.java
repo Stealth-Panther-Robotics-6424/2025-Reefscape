@@ -378,7 +378,7 @@ public class RobotContainer {
                                                                 .getAsBoolean()),
                                                                 Commands.sequence(
                                                                                 endEffector.IntakeAlgea()
-                                                                                                .withTimeout(0.1),
+                                                                                                .withTimeout(0.05),
                                                                                 endEffector.ShootAlgea())))));
 
                 // When algea mode is enabled and button 2 is hit and button 5 is not hit shoot

@@ -34,13 +34,13 @@
   "eventMarkers": [
     {
       "name": "L1",
-      "waypointRelativePos": 0.2,
+      "waypointRelativePos": 0.1,
       "endWaypointRelativePos": null,
       "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 2.5,
     "maxAcceleration": 2.5,
     "maxAngularVelocity": 500.0,
     "maxAngularAcceleration": 720.0,

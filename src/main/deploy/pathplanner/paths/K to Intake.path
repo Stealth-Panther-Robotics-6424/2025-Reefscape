@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.9440824468085105,
-        "y": 5.320246010638297
+        "x": 3.9470328282828278,
+        "y": 5.275189393939394
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.289037883279693,
-        "y": 5.688505235808441
+        "x": 3.29198826475401,
+        "y": 5.643448619109538
       },
       "isLocked": false,
       "linkedName": "end of 2P"
@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "L1",
-      "waypointRelativePos": 0.2,
+      "waypointRelativePos": 0.1,
       "endWaypointRelativePos": null,
       "command": null
     }

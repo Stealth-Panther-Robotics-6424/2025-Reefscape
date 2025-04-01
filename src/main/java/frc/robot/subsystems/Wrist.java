@@ -276,7 +276,7 @@ public class Wrist extends SubsystemBase {
           this.safeFold = canFold.getAsBoolean(); // Set wrist to position L1 (0.445)
         },
         () -> {
-          this.setWristMotor(-0.5);
+          this.setWristMotor(-0.4);
 
         },
         interrupted -> {

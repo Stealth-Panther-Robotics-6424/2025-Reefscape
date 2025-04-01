@@ -63,6 +63,12 @@
           "data": {
             "name": "Shoot Coral"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Drive back after L4 on Y"
+          }
         }
       ]
     }
