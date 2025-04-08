@@ -7,7 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "GH Algae pick"
+            "pathName": "WORLDS - Middle to G L4 "
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot Coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "WORLDS - Coral L4 To Algea GH"
           }
         },
         {
@@ -17,19 +29,13 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
           "type": "deadline",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "GH Algea Score"
+                  "pathName": "WORLDS - GH Algea Score"
                 }
               },
               {

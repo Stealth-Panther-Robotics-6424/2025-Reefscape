@@ -168,6 +168,8 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Shoot Algea", endEffector.ShootAlgea().withTimeout(2));
                 NamedCommands.registerCommand("Intake Algea", endEffector.IntakeAlgea().withTimeout(.5));
                 NamedCommands.registerCommand("Hold Algea", endEffector.HoldAlgea());
+                // NamedCommands.registerCommand("Hold Coral",
+                // endEffector.TeleIntakeCoral(DontIntakeWrist));
 
                 new EventTrigger("L4").onTrue(Commands.sequence(wrist.WristSafety(
                                 () -> canFold.getAsBoolean()),
@@ -189,6 +191,10 @@ public class RobotContainer {
                                 elevator.ElevatorProcessor(wristLimiter),
                                 wrist.WristProcessor(() -> canFold
                                                 .getAsBoolean())));
+
+                // new EventTrigger("Index").onTrue(Commands.sequence(
+                // endEffector.FeedForward(), endEffector.FeedBack(),
+                // endEffector.FeedForward()));
 
                 /*
                  * NamedCommands.registerCommand("Wrist Safety", wrist.WristSafety(canFold));

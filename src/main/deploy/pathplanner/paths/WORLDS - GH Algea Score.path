@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.1,
-        "y": 1.90126329787234
+        "x": 5.951130319148937,
+        "y": 4.0249999999999995
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.239724195163365,
-        "y": 2.051921869157643
+        "x": 6.951130319148937,
+        "y": 4.0249999999999995
+      },
+      "isLocked": false,
+      "linkedName": "End of 12 Oclock Algea Pick"
+    },
+    {
+      "anchor": {
+        "x": 7.106349734042554,
+        "y": 3.4532247340425526
+      },
+      "prevControl": {
+        "x": 7.251979469399556,
+        "y": 3.6564290159360437
+      },
+      "nextControl": {
+        "x": 6.604587765957446,
+        "y": 2.7530917553191485
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.0292885638297875,
-        "y": 2.7764295212765955
+        "x": 5.97,
+        "y": 0.78
       },
       "prevControl": {
-        "x": 5.537412019127443,
-        "y": 2.271772243713733
+        "x": 6.053812862669245,
+        "y": 1.4860683295723196
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "End at E L4"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -33,8 +49,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "L4",
-      "waypointRelativePos": 0,
+      "name": "Processor",
+      "waypointRelativePos": 1.5,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -49,13 +65,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 121.18470340650707
+    "rotation": -90.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "MIDDLE 2 PIECE",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.31793960682734
+    "rotation": 180.0
   },
   "useDefaultConstraints": false
 }

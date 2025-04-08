@@ -8,28 +8,42 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.357114361702128,
-        "y": 2.7764295212765955
+        "x": 2.9755651595744683,
+        "y": 2.3563497340425523
       },
       "isLocked": false,
       "linkedName": "End of Intake to C"
     },
     {
       "anchor": {
-        "x": 1.3302526595744681,
+        "x": 1.2602393617021277,
         "y": 0.9910904255319144
       },
       "prevControl": {
-        "x": 2.485472074468085,
+        "x": 2.4154587765957447,
         "y": 1.8195811170212755
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Sitting at Right Side Intake"
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.90909090909091,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 1.2,
+        "maxAcceleration": 1.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
@@ -40,8 +54,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 1.5,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -49,10 +63,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 54.16234704572179
+    "rotation": 54.46232220802563
   },
   "reversed": false,
-  "folder": null,
+  "folder": "RIGHT SIDE 3 PIECE",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 60.57254359681025

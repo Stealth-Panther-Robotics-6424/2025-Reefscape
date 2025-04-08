@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.118018617021277,
-        "y": 1.8895944148936166
+        "x": 7.0480053191489365,
+        "y": 2.4730385638297867
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.110404671921193,
-        "y": 1.932420268691776
+        "x": 6.040391374048853,
+        "y": 2.515864417627946
       },
       "isLocked": false,
       "linkedName": "End of Right Bulldozer move"
@@ -17,36 +17,45 @@
     {
       "anchor": {
         "x": 5.0292885638297875,
-        "y": 2.7764295212765955
+        "y": 2.764760638297872
       },
       "prevControl": {
-        "x": 5.51938164893617,
-        "y": 2.589727393617021
+        "x": 5.589394946808511,
+        "y": 2.3563497340425523
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
+  "rotationTargets": [],
+  "constraintZones": [
     {
-      "waypointRelativePos": 0.4271653543307087,
-      "rotationDegrees": 122.0
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.8648018648018648,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 1.2,
+        "maxAcceleration": 1.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
     }
   ],
-  "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "L4",
-      "waypointRelativePos": 0,
+      "waypointRelativePos": 0.3,
       "endWaypointRelativePos": null,
       "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 1.0,
-    "maxAcceleration": 0.8,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -57,10 +66,10 @@
     "rotation": 120.96375653207349
   },
   "reversed": false,
-  "folder": null,
+  "folder": "RIGHT SIDE 3 PIECE",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.31793960682734
+    "rotation": 180.0
   },
   "useDefaultConstraints": false
 }
