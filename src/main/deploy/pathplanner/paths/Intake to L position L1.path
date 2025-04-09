@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2252327127659575,
-        "y": 7.047240691489361
+        "x": 1.3185837765957447,
+        "y": 7.023902925531915
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0331288240219196,
-        "y": 6.473581279739342
+        "x": 2.126479887851707,
+        "y": 6.450243513781896
       },
       "isLocked": false,
       "linkedName": "sitting at left intake"
@@ -32,7 +32,7 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.869463869463869,
+      "minWaypointRelativePos": 0.65,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
         "maxVelocity": 1.2,
@@ -54,7 +54,7 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.5,
+    "maxVelocity": 3.0,
     "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,

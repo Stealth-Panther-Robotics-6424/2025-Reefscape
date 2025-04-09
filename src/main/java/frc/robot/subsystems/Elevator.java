@@ -248,7 +248,7 @@ public class Elevator extends SubsystemBase {
         () -> {
           // Use joystick input to control elevator power. Apply a scaling factor of 0.2
           // for smooth control.
-          this.setElevatorMotor(elevatorJoystick.getAsDouble() * 0.4 + 0.1);// 0.4 + 0.1
+          this.setElevatorMotor(elevatorJoystick.getAsDouble() * 0.4 + 0.1);// 0.4 + 0.1 //TODO turn me down
           this.canLift = wristLimiter.getAsBoolean(); // Update lifting condition.
         },
 
@@ -409,8 +409,8 @@ public class Elevator extends SubsystemBase {
     }
 
     // Update the current status of the forward and reverse limit switches.
-    this.DS_forwardLimit.setDouble((this.elevatorTalonStrb.getForwardLimit().getValueAsDouble()));
-    this.DS_reverseLimit.setDouble(this.elevatorTalonStrb.getReverseLimit().getValueAsDouble());
+    this.DS_forwardLimit.setBoolean((this.elevatorTalonStrb.getForwardLimit().getValueAsDouble() == 1));
+    this.DS_reverseLimit.setBoolean((this.elevatorTalonStrb.getReverseLimit().getValueAsDouble() == 1));
     this.DS_ElevatorSetpoint.setDouble(elevatorController.getSetpoint());
     this.DS_canLift.setBoolean(this.canLift);
     SmartDashboard.putData(CommandScheduler.getInstance());

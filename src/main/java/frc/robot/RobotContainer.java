@@ -42,7 +42,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.command.UpdateLocalizationWithVision;
+//import frc.robot.command.UpdateLocalizationWithVision;
 import frc.robot.command.holdXPos;
 import frc.robot.command.MergeVisionOdometryCommand;
 

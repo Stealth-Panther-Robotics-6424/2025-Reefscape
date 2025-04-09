@@ -94,7 +94,7 @@ public class Wrist extends SubsystemBase {
     // Get the configuration interface for the TalonFX motor controller
     var limitConfigs = new CurrentLimitsConfigs();
     // Create a new configuration object for current limits
-    limitConfigs.StatorCurrentLimit = 120;
+    limitConfigs.StatorCurrentLimit = 120; // TODO turn me down to 60
     // Set the stator current limit to 120 Amps to protect the motor from
     // overcurrent
     limitConfigs.StatorCurrentLimitEnable = true;
@@ -236,7 +236,7 @@ public class Wrist extends SubsystemBase {
         }, // Initialize: No action needed
         () -> {
           // this.wristSpeed = this.DS_WristSpeed.getDouble(wristSpeed);
-          this.setWristMotor(wristJoystick.getAsDouble() * 0.3);
+          this.setWristMotor(wristJoystick.getAsDouble() * 0.3); // TODO turn me down
         }, // Execute: Set wrist motor power based
         // this.wristSpeed
         // on joystick
