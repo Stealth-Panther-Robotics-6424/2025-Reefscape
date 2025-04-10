@@ -42,7 +42,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.command.UpdateLocalizationWithVision;
+
 import frc.robot.command.holdXPos;
 import frc.robot.command.MergeVisionOdometryCommand;
 
@@ -409,6 +409,12 @@ public class RobotContainer {
 
                 // Wrist and elevator commands for specific positions, triggered by button
                 // presses
+
+                (BBLockout.negate()).and(algeaModeEnabled.negate().and(buttonbord.button(9)))
+                                .onTrue(Commands.sequence(wrist.WristSafety(
+                                                () -> canFold.getAsBoolean()), elevator.ElevatorA2(wristLimiter),
+                                                wrist.WristA1(() -> canFold.getAsBoolean())));
+
                 (BBLockout.negate()).and(algeaModeEnabled.negate().and(buttonbord.button(1)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()),

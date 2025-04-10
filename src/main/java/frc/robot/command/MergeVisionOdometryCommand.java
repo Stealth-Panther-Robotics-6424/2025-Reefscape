@@ -4,6 +4,7 @@ import com.ctre.phoenix6.Utils;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,6 +31,7 @@ public class MergeVisionOdometryCommand extends Command {
     private final CommandSwerveDrivetrain drivetrain;
     // Define a minimum confidence threshold (you can adjust this value as needed)
     private final double MIN_CONFIDENCE = 0.5;
+    private Pose2d currentPose;
 
     /**
      * Constructor for the MergeVisionOdometryCommand.
@@ -50,8 +52,11 @@ public class MergeVisionOdometryCommand extends Command {
     @Override
     public void execute() {
         // Retrieve the vision pose estimates from both limelights.
-        LimelightHelpers.PoseEstimate bowEstimate = vision.bowLL.getVisionPose();
-        LimelightHelpers.PoseEstimate aftEstimate = vision.aftLL.getVisionPose();
+        currentPose = drivetrain.getState().Pose;
+        vision.bowLL.setRobotOrientation(currentPose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        vision.aftLL.setRobotOrientation(currentPose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.PoseEstimate bowEstimate = vision.bowLL.getVisionPoseMT2();
+        LimelightHelpers.PoseEstimate aftEstimate = vision.aftLL.getVisionPoseMT2();
 
         // Check if the bowl (front) limelight sees a target and if its confidence meets
         // the threshold.
@@ -61,7 +66,7 @@ public class MergeVisionOdometryCommand extends Command {
                     bowEstimate.pose,
                     Utils.fpgaToCurrentTime(
                             bowEstimate.timestampSeconds),
-                    VecBuilder.fill(0.1, 0.1, 0.1));
+                    VecBuilder.fill(0.1, 0.1, 9999));
         }
 
         // Check if the aft (rear) limelight sees a target and if its confidence meets
@@ -71,7 +76,7 @@ public class MergeVisionOdometryCommand extends Command {
             drivetrain.addVisionMeasurement(
                     aftEstimate.pose,
                     Utils.fpgaToCurrentTime(aftEstimate.timestampSeconds),
-                    VecBuilder.fill(0.1, 0.1, 0.1));
+                    VecBuilder.fill(0.1, 0.1, 9999));
         }
     }
 

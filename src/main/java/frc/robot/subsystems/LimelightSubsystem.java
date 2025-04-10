@@ -192,6 +192,17 @@ public class LimelightSubsystem extends SubsystemBase {
         return (targetPose.length > 5) ? targetPose[5] : 0.0;
     }
 
+    public LimelightHelpers.PoseEstimate getVisionPoseMT2() {
+        LimelightHelpers.PoseEstimate poseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelight);
+        return (poseEstimate != null) ? poseEstimate : new LimelightHelpers.PoseEstimate();
+    }
+
+    public void setRobotOrientation(double yaw, double yawRate,
+            double pitch, double pitchRate,
+            double roll, double rollRate) {
+        LimelightHelpers.SetRobotOrientation(limelight, yaw, yawRate, pitch, pitchRate, roll, rollRate);
+    }
+
     @Override
     public void periodic() {
         // Update target pose values from the NetworkTables
