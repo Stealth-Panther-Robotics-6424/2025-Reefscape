@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2602393617021277,
-        "y": 0.9910904255319144
+        "x": 1.213563829787234,
+        "y": 1.0611037234042544
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.170412234042553,
-        "y": 1.3995013297872332
+        "x": 2.0420545212765955,
+        "y": 1.2478058510638288
       },
       "isLocked": false,
       "linkedName": "Sitting at Right Side Intake"
@@ -20,8 +20,8 @@
         "y": 2.9406787345157572
       },
       "prevControl": {
-        "x": 2.9872340425531916,
-        "y": 2.379687499999999
+        "x": 2.9638962765957446,
+        "y": 2.0646276595744677
       },
       "nextControl": null,
       "isLocked": false,
@@ -35,8 +35,8 @@
       "minWaypointRelativePos": 0.8484848484848487,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 1.2,
-        "maxAcceleration": 1.0,
+        "maxVelocity": 2.0,
+        "maxAcceleration": 1.8,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
@@ -48,14 +48,14 @@
   "eventMarkers": [
     {
       "name": "L4",
-      "waypointRelativePos": 0.1,
+      "waypointRelativePos": 0.05,
       "endWaypointRelativePos": null,
       "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 3.5,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

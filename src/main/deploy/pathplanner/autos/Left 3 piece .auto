@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right side 3"
+            "pathName": "Left Start L4 I"
           }
         },
         {
@@ -29,7 +29,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "E to Intake"
+                  "pathName": "i TO INTAKE"
                 }
               }
             ]
@@ -38,7 +38,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "intake to c"
+            "pathName": "Left intake to k"
           }
         },
         {
@@ -60,7 +60,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "C to Intake "
+                  "pathName": "K to Intake"
                 }
               }
             ]
@@ -69,7 +69,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right L4 D"
+            "pathName": "Intake to L position L4"
           }
         },
         {
@@ -91,7 +91,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "D to Intake"
+                  "pathName": "Drive back after L4 on Y"
                 }
               }
             ]

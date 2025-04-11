@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.2252327127659575,
-        "y": 7.047240691489361
+        "x": 1.2369015957446807,
+        "y": 6.988896276595744
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0331288240219196,
-        "y": 6.473581279739342
+        "x": 2.044797707000643,
+        "y": 6.415236864845725
       },
       "isLocked": false,
       "linkedName": "sitting at left intake"
@@ -48,7 +48,7 @@
   "eventMarkers": [
     {
       "name": "L4",
-      "waypointRelativePos": 0.1,
+      "waypointRelativePos": 0.05,
       "endWaypointRelativePos": null,
       "command": null
     }
