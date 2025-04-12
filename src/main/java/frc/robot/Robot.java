@@ -58,6 +58,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousExit() {
+    m_robotContainer.elevator.setMotorBrake();
   }
 
   @Override
@@ -65,6 +66,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    m_robotContainer.elevator.setMotorCoast();
   }
 
   @Override

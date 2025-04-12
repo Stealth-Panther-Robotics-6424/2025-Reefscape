@@ -101,6 +101,16 @@ public class Elevator extends SubsystemBase {
     // the second motor (commented out)
   }
 
+  public void setMotorCoast() {
+    elevatorTalonPort.setNeutralMode(NeutralModeValue.Coast);
+    elevatorTalonStrb.setNeutralMode(NeutralModeValue.Coast);
+  }
+
+  public void setMotorBrake() {
+    elevatorTalonPort.setNeutralMode(NeutralModeValue.Brake);
+    elevatorTalonStrb.setNeutralMode(NeutralModeValue.Brake);
+  }
+
   // Method to check if the elevator has reached its setpoint.
   public boolean elevatorAtSetpoint() {
     return this.elevatorController.atSetpoint(); // Returns true if the elevator is at its setpoint.
@@ -342,6 +352,11 @@ public class Elevator extends SubsystemBase {
 
     return MovetoPosition(wristLimiter, -0.6);
 
+  }
+
+  public Command ElevatorShot(BooleanSupplier wristLimiter) {
+
+    return MovetoPosition(wristLimiter, 17.3);
   }
 
   // Command to move the elevator to the L2 position OG(20) New (11.43)

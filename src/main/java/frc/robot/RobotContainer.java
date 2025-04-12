@@ -96,7 +96,7 @@ public class RobotContainer {
         private final CommandJoystick joystick = new CommandJoystick(0); // My joystick
         private final CommandJoystick buttonbord = new CommandJoystick(1); // Buttonboard joystick
         private final Wrist wrist; // Wrist subsystem for arm control
-        private final Elevator elevator; // Elevator subsystem for vertical movements
+        public final Elevator elevator; // Elevator subsystem for vertical movements
         private final EndEffector endEffector; // Intake subsystem for grabbing objects
         private final Climber climber; // Intake subsystem for grabbing objects
         private final Vision vision;
@@ -120,6 +120,7 @@ public class RobotContainer {
         private final Trigger BBLockout;
         private final Trigger DontIntakeWrist;
         private final Trigger BargePos;
+        private final Trigger l1Trigger;
 
         /* Some triggers related to elevator throttles (to be developed in Sprint 4) */
         /*
@@ -145,6 +146,8 @@ public class RobotContainer {
                 vision = new Vision();
 
                 wristLimiter = wrist.wristLimiter();
+                l1Trigger = new Trigger(
+                                () -> (elevator.getElevatorPosition() < 18 && elevator.getElevatorPosition() > 13));
                 canFold = elevator.canFold();
                 BBLockout = endEffector.BBLockout();
                 wristIntake = wrist.wristIntake();
@@ -357,7 +360,10 @@ public class RobotContainer {
                                 .isTeleop()) // .and(buttonbord.button(5))
                                 .whileTrue(endEffector.IntakeCoral());
                 // When algea mode is diabled and button 5 is hit Intake coral manually
-                algeaModeEnabled.negate().and(buttonbord.button(2)).whileTrue(endEffector.shootCoral());
+                algeaModeEnabled.negate().and(buttonbord.button(2))
+                                .and(l1Trigger.negate()).whileTrue(endEffector.shootCoral());
+
+                algeaModeEnabled.negate().and(buttonbord.button(2)).and(l1Trigger).whileTrue(endEffector.ShootL1());
                 // When algea mode is diabled and button 2 is hit shoot coral
                 algeaModeEnabled.negate().and(buttonbord.button(3)).whileTrue(endEffector.manualBackFeed());
                 // When algea mode is diabled and button 3 is hit backfeed coral
@@ -412,7 +418,7 @@ public class RobotContainer {
 
                 (BBLockout.negate()).and(algeaModeEnabled.negate().and(buttonbord.button(9)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
-                                                () -> canFold.getAsBoolean()), elevator.ElevatorA2(wristLimiter),
+                                                () -> canFold.getAsBoolean()), elevator.ElevatorShot(wristLimiter),
                                                 wrist.WristA1(() -> canFold.getAsBoolean())));
 
                 (BBLockout.negate()).and(algeaModeEnabled.negate().and(buttonbord.button(1)))
