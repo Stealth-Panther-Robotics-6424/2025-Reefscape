@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3185837765957447,
-        "y": 1.0494348404255311
+        "x": 1.3302526595744681,
+        "y": 0.9910904255319144
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.983710106382979,
-        "y": 1.2361369680851058
+        "x": 1.9533390410958904,
+        "y": 1.5307363013698625
       },
       "isLocked": false,
-      "linkedName": "Sitting at Right Side Intake"
+      "linkedName": "End of E to Intake"
     },
     {
       "anchor": {
-        "x": 3.629022606382979,
-        "y": 2.939793882978723
+        "x": 3.6640292553191487,
+        "y": 2.9281249999999988
       },
       "prevControl": {
-        "x": 3.115591755319149,
-        "y": 2.274667553191489
+        "x": 3.1505984042553186,
+        "y": 2.262998670212765
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Sitting at C L4"
+      "linkedName": "End of Intake to C"
     }
   ],
   "rotationTargets": [],
@@ -49,13 +49,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 58.29857033049423
+    "rotation": 60.57254359681025
   },
   "reversed": false,
-  "folder": null,
+  "folder": "RIGHT SIDE 3 PIECE",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 54.46232220802563
+    "rotation": 54.16234704572179
   },
   "useDefaultConstraints": false
 }

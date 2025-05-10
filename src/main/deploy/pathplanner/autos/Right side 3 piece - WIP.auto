@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start of L4 3P i peg"
+            "pathName": "Right side 3"
           }
         },
         {
@@ -19,19 +19,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": " I position to Left Intake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Intake Coral"
+            "pathName": "E to Intake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Intake to K position L4"
+            "pathName": "intake to c"
           }
         },
         {
@@ -43,25 +37,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "K to Intake"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Intake Coral"
+            "pathName": "C to Intake "
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Intake to L position L1"
+            "pathName": "Right L4 D"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Shoot Coral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "D to Intake"
           }
         }
       ]

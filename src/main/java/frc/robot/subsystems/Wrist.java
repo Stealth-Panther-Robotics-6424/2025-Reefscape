@@ -270,6 +270,24 @@ public class Wrist extends SubsystemBase {
         this);
   }
 
+  public Command BargeShotPullback(BooleanSupplier canFold) {
+    return new FunctionalCommand(
+        () -> {
+          this.safeFold = canFold.getAsBoolean(); // Set wrist to position L1 (0.445)
+        },
+        () -> {
+          this.setWristMotor(-0.4);
+
+        },
+        interrupted -> {
+          this.setWristPID(this.getWristPosition());
+          this.setWristMotor(0);
+
+        }, // Interrupted: No specific action when interrupted
+        () -> this.getWristPosition() <= 0.06, // Finish condition: Check if wrist has reached L1 position
+        this);
+  }
+
   // Command to start the wrist motor but with no action (used for state
   // transitions)
   public Command startWristCommand() { // This command makes the wrist hold its starting position
@@ -322,6 +340,11 @@ public class Wrist extends SubsystemBase {
     // Subsystem: This command is bound to the Wrist subsystem
   }
 
+  public Command WristBargeShoot(BooleanSupplier canFold) {
+    return wristCommandFactory(canFold, 0.35).until(() -> this.wristAtSetpoint()); // Potentially .308
+    // Subsystem: This command is bound to the Wrist subsystem
+  }
+
   public Command WristProcessor(BooleanSupplier canFold) {
     return wristCommandFactory(canFold, -.01);
     // Subsystem: This command is bound to the Wrist subsystem
@@ -336,6 +359,11 @@ public class Wrist extends SubsystemBase {
   public Command ExitState(BooleanSupplier canFold) {
     return wristCommandFactory(canFold, this.getWristPosition());
 
+  }
+
+  public Command WristStop() {
+    return runOnce(() -> this.setWristMotor(0));
+    // Subsystem: This command is bound to the Wrist subsystem
   }
 
   // Periodic method called once per scheduler run, used for updating real-time

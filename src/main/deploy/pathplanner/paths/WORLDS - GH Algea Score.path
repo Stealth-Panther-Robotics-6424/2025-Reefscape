@@ -3,51 +3,58 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.0470462328767125,
-        "y": 1.9063784246575346
+        "x": 5.951130319148937,
+        "y": 4.0249999999999995
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.407662671232877,
-        "y": 1.9063784246575346
+        "x": 6.951130319148937,
+        "y": 4.0249999999999995
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "End of 12 Oclock Algea Pick"
     },
     {
       "anchor": {
-        "x": 7.129687500005052,
-        "y": 1.8895944148974069
+        "x": 7.106349734042554,
+        "y": 3.4532247340425526
       },
       "prevControl": {
-        "x": 7.379640686934432,
-        "y": 1.8847566112794187
+        "x": 7.251979469399556,
+        "y": 3.6564290159360437
       },
       "nextControl": {
-        "x": 6.879734313075672,
-        "y": 1.894432218515395
+        "x": 6.604587765957446,
+        "y": 2.7530917553191485
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.954654255319149,
-        "y": 1.90126329787234
+        "x": 5.97,
+        "y": 0.78
       },
       "prevControl": {
-        "x": 7.281382978723404,
-        "y": 1.8895944148936168
+        "x": 6.053812862669245,
+        "y": 1.4860683295723196
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "End of Right Bulldozer move"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Processor",
+      "waypointRelativePos": 1.5,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 2.0,
     "maxAcceleration": 1.5,
@@ -58,10 +65,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 179.31793960682734
+    "rotation": -90.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "MIDDLE 2 PIECE",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

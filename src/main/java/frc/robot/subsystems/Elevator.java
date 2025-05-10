@@ -149,10 +149,12 @@ public class Elevator extends SubsystemBase {
     SmartDashboard.putNumber("Input", power);
     // If the elevator can't lift or if the elevator is at the top or bottom, set
     // the output power to a small value.
-    if ((!canLift)
+    if ((((!canLift) && ((elevatorTalonStrb.getPosition().getValueAsDouble() <= 56) || (elevatorTalonStrb.getPosition()
+        .getValueAsDouble() >= 56
+        && power < 0)))
         || (elevatorTalonStrb.getPosition().getValueAsDouble() >= 65.71 && power > 0) // Positive Power makes the
         // robot go up negative makes the robot go down
-        || (elevatorTalonStrb.getPosition().getValueAsDouble() <= 0.29 && power < 0)) {
+        || (elevatorTalonStrb.getPosition().getValueAsDouble() <= 0.29 && power < 0))) {
 
       output = 0.0;
       // Output is zero but is given a kf value of .02 when it is applied to the motor
@@ -205,6 +207,15 @@ public class Elevator extends SubsystemBase {
     // Original values in order 26, 50.5, 59, 104
     // new values in order 14.86, 28.86, 33.71, 59.43
     return new Trigger(() -> (elevatorTalonStrb.getReverseLimit().getValueAsDouble() == 1));
+
+  }
+
+  public Trigger bargePosTrigger() { // this method sets whether the wrist can fold back based on the elevator
+    // position this prevents folding back into the crossmembers
+    // Original values in order 26, 50.5, 59, 104
+    // new values in order 14.86, 28.86, 33.71, 59.43
+    return new Trigger(
+        () -> ((elevatorTalonStrb.getForwardLimit().getValueAsDouble() == 1) || (this.getElevatorPosition() >= 62)));
 
   }
 
@@ -290,7 +301,8 @@ public class Elevator extends SubsystemBase {
         },
 
         interrupted -> {
-          this.canLift = wristLimiter.getAsBoolean(); // Update lifting condition when interrupted.
+          this.canLift = wristLimiter.getAsBoolean();
+          this.setElevatorPID(this.getElevatorPosition()); // Update lifting condition when interrupted.
         },
 
         () -> {
@@ -347,7 +359,7 @@ public class Elevator extends SubsystemBase {
   // Command to move the elevator to the L4 position OG (113.7). New(64.97)
   public Command ElevatorL4(BooleanSupplier wristLimiter) {
 
-    return MovetoPosition(wristLimiter, 66).until(() -> elevatorTalonStrb.getForwardLimit().getValueAsDouble() == 1);
+    return MovetoPosition(wristLimiter, 66).until((() -> elevatorTalonStrb.getForwardLimit().getValueAsDouble() == 1));
   }
 
   public Command ElevatorA1(BooleanSupplier wristLimiter) {
@@ -402,6 +414,7 @@ public class Elevator extends SubsystemBase {
     this.DS_ElevatorSetpoint.setDouble(elevatorController.getSetpoint());
     this.DS_canLift.setBoolean(this.canLift);
     SmartDashboard.putData(CommandScheduler.getInstance());
+    SmartDashboard.putBoolean("BargePos", this.bargePosTrigger().getAsBoolean());
     // The periodic method is called to regularly update the robot's status.
   }
 

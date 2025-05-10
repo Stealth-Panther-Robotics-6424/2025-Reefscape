@@ -3,45 +3,38 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.1296875,
-        "y": 7.537333776595744
+        "x": 7.0470462328767125,
+        "y": 6.143621575342466
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.814420367163154,
-        "y": 7.235731148861948
+        "x": 7.2970462328767125,
+        "y": 6.143621575342466
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.321010638297873,
-        "y": 5.121875
+        "x": 7.242380136986301,
+        "y": 6.158647260273973
       },
       "prevControl": {
-        "x": 8.216063395352206,
-        "y": 8.115609529483127
+        "x": 8.041275684931502,
+        "y": 6.128595890410961
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "End Of Left L4"
+      "linkedName": "end of bulldoze"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "L4",
-      "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -49,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -119.42745640318965
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "LEFT BULLDOZER 2 PIECE",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

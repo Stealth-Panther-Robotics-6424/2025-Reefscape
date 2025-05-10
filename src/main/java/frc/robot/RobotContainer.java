@@ -36,11 +36,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.command.UpdateLocalizationWithVision;
+import frc.robot.command.holdXPos;
 import frc.robot.command.MergeVisionOdometryCommand;
 
 import frc.robot.generated.TunerConstants;
@@ -96,7 +99,9 @@ public class RobotContainer {
         private final Elevator elevator; // Elevator subsystem for vertical movements
         private final EndEffector endEffector; // Intake subsystem for grabbing objects
         private final Climber climber; // Intake subsystem for grabbing objects
-        private final Vision vision; // Intake subsystem for grabbing objects
+        private final Vision vision;
+
+        // Intake subsystem for grabbing objects
 
         private boolean AlgeaMode = false;
 
@@ -114,6 +119,7 @@ public class RobotContainer {
         private final Trigger reverseLimitHit;
         private final Trigger BBLockout;
         private final Trigger DontIntakeWrist;
+        private final Trigger BargePos;
 
         /* Some triggers related to elevator throttles (to be developed in Sprint 4) */
         /*
@@ -148,6 +154,7 @@ public class RobotContainer {
                 algeaModeEnabled = new Trigger(() -> getAlgeaMode());
                 reverseLimitHit = elevator.reverseLimitHit();
                 DontIntakeWrist = wrist.wristDontIntake();
+                BargePos = elevator.bargePosTrigger();
                 // selector on the dashboard
 
                 // Define and register commands for the intake subsystem with different
@@ -161,10 +168,17 @@ public class RobotContainer {
                 NamedCommands.registerCommand("Shoot Algea", endEffector.ShootAlgea().withTimeout(2));
                 NamedCommands.registerCommand("Intake Algea", endEffector.IntakeAlgea().withTimeout(.5));
                 NamedCommands.registerCommand("Hold Algea", endEffector.HoldAlgea());
+                // NamedCommands.registerCommand("Hold Coral",
+                // endEffector.TeleIntakeCoral(DontIntakeWrist));
 
-                new EventTrigger("L4").onTrue((Commands.sequence(wrist.WristSafety(
-                                () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
-                                wrist.WristL4(() -> canFold.getAsBoolean()))));
+                new EventTrigger("L4").onTrue(Commands.sequence(wrist.WristSafety(
+                                () -> canFold.getAsBoolean()),
+                                Commands.parallel(elevator.ElevatorL4(
+                                                wristLimiter),
+                                                Commands.sequence(new WaitUntilCommand(() -> elevator
+                                                                .getElevatorPosition() >= 56),
+                                                                wrist.WristL4(() -> canFold
+                                                                                .getAsBoolean())))));
                 new EventTrigger("L1").onTrue(Commands.sequence(wrist.WristSafety(
                                 () -> canFold.getAsBoolean()), elevator.ElevatorL1(wristLimiter),
                                 wrist.WristL1(() -> canFold.getAsBoolean())));
@@ -177,6 +191,10 @@ public class RobotContainer {
                                 elevator.ElevatorProcessor(wristLimiter),
                                 wrist.WristProcessor(() -> canFold
                                                 .getAsBoolean())));
+
+                // new EventTrigger("Index").onTrue(Commands.sequence(
+                // endEffector.FeedForward(), endEffector.FeedBack(),
+                // endEffector.FeedForward()));
 
                 /*
                  * NamedCommands.registerCommand("Wrist Safety", wrist.WristSafety(canFold));
@@ -261,6 +279,29 @@ public class RobotContainer {
                                                                                 // X (left)
                 );
 
+                joystick.pov(90).whileTrue((drivetrain.applyRequest(() -> robotCentricDrive
+                                .withVelocityX(0) // Drive forward with
+                                // negative Y (forward)
+                                .withVelocityY(MaxSpeed * -0.1 * throttle(
+                                                3)) // Drive left with
+                                                    // negative X (left)
+                                .withRotationalRate(0))));
+
+                joystick.pov(270).whileTrue((drivetrain.applyRequest(() -> robotCentricDrive
+                                .withVelocityX(0) // Drive forward with
+                                // negative Y (forward)
+                                .withVelocityY(MaxSpeed * 0.1 * throttle(
+                                                3)) // Drive left with
+                                                    // negative X (left)
+                                .withRotationalRate(0))));
+                joystick.pov(0).whileTrue((drivetrain.applyRequest(() -> robotCentricDrive
+                                .withVelocityX(MaxSpeed * 0.2 * throttle(
+                                                3)) // Drive forward with
+                                // negative Y (forward)
+                                .withVelocityY(0) // Drive left with
+                                                  // negative X (left)
+                                .withRotationalRate(0))));
+
                 // Joystick button to reset field-centric heading
                 joystick.button(3).and(joystick.button(2))
                                 .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
@@ -331,7 +372,21 @@ public class RobotContainer {
                 // by applying a 3% back spin
 
                 algeaModeEnabled.and(buttonbord.button(2)).and(buttonbord.button(5).negate())
+                                .and(BargePos.negate())
                                 .whileTrue(endEffector.ShootAlgea());
+
+                algeaModeEnabled.and(buttonbord.button(2)).and(buttonbord.button(5).negate())
+                                .and(BargePos)
+                                .onTrue(Commands.sequence(wrist.BargeShotPullback(() -> canFold
+                                                .getAsBoolean()), elevator.ElevatorBarge(
+                                                                wristLimiter),
+                                                (Commands.parallel(wrist.WristBargeShoot(() -> canFold
+                                                                .getAsBoolean()),
+                                                                Commands.sequence(
+                                                                                endEffector.IntakeAlgea()
+                                                                                                .withTimeout(0.05),
+                                                                                endEffector.ShootAlgea())))));
+
                 // When algea mode is enabled and button 2 is hit and button 5 is not hit shoot
                 // algea
 
@@ -356,8 +411,13 @@ public class RobotContainer {
                 // presses
                 (BBLockout.negate()).and(algeaModeEnabled.negate().and(buttonbord.button(1)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
-                                                () -> canFold.getAsBoolean()), elevator.ElevatorL4(wristLimiter),
-                                                wrist.WristL4(() -> canFold.getAsBoolean())));
+                                                () -> canFold.getAsBoolean()),
+                                                Commands.parallel(elevator.ElevatorL4(
+                                                                wristLimiter),
+                                                                Commands.sequence(new WaitUntilCommand(() -> elevator
+                                                                                .getElevatorPosition() >= 56),
+                                                                                wrist.WristL4(() -> canFold
+                                                                                                .getAsBoolean())))));
                 (BBLockout.negate()).and(algeaModeEnabled.negate().and(buttonbord.button(4)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
                                                 () -> canFold.getAsBoolean()), elevator.ElevatorL3(wristLimiter),
@@ -385,8 +445,14 @@ public class RobotContainer {
 
                 (algeaModeEnabled.and(buttonbord.button(1)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
-                                                () -> canFold.getAsBoolean()), elevator.ElevatorBarge(wristLimiter),
-                                                wrist.WristBarge(() -> canFold.getAsBoolean())));
+                                                () -> canFold.getAsBoolean()),
+                                                Commands.parallel(
+                                                                elevator.ElevatorBarge(
+                                                                                wristLimiter),
+                                                                Commands.sequence(new WaitUntilCommand(() -> elevator
+                                                                                .getElevatorPosition() >= 56),
+                                                                                wrist.WristBarge(() -> canFold
+                                                                                                .getAsBoolean())))));
 
                 (algeaModeEnabled.and(buttonbord.button(11)))
                                 .onTrue(Commands.sequence(wrist.WristSafety(
@@ -408,7 +474,7 @@ public class RobotContainer {
                                 .onTrue(climber.ManualClimber(() -> joystick.button(6).getAsBoolean(),
                                                 () -> joystick.button(5).getAsBoolean()));
 
-                RobotModeTriggers.teleop().whileTrue(vision.TelopVision());
+                // RobotModeTriggers.teleop().whileTrue(vision.TelopVision());
 
                 // (reverseLimitHit).onTrue(elevator.Zero());
 
@@ -424,6 +490,17 @@ public class RobotContainer {
                                 .toggleOnTrue(climber.TrayManualUp());
 
                 joystick.button(7).toggleOnTrue(climber.TrayManualDown());
+
+                joystick.button(1).whileTrue(Commands.sequence(
+                                drivetrain.BargeAid(),
+                                new holdXPos(drivetrain,
+                                                8.1,
+                                                MaxSpeed,
+                                                MaxAngularRate,
+                                                () -> -joystick.getRawAxis(0),
+                                                () -> -joystick.getRawAxis(4),
+                                                () -> throttle(3),
+                                                () -> elevator.elevatorThrottle(), 180)));
 
         }
 

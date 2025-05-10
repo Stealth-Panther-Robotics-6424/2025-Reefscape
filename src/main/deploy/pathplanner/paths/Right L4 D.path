@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.3185837765957447,
-        "y": 1.0494348404255311
+        "x": 1.2602393617021277,
+        "y": 0.9910904255319144
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.318583776595745,
-        "y": 1.0494348404255311
+        "x": 2.260239361702128,
+        "y": 0.9910904255319144
       },
       "isLocked": false,
       "linkedName": "Sitting at Right Side Intake"
@@ -25,11 +25,25 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Scored on D L4"
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.8275058275058275,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 1.2,
+        "maxAcceleration": 1.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
@@ -40,8 +54,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 3.5,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -52,7 +66,7 @@
     "rotation": 59.0362434679265
   },
   "reversed": false,
-  "folder": null,
+  "folder": "RIGHT SIDE 3 PIECE",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 54.46232220802563

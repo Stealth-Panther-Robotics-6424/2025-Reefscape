@@ -2,6 +2,9 @@ package frc.robot.subsystems;
 
 // Import necessary classes and packages from WPILib, CTRE Phoenix 6, and PathPlanner
 import static edu.wpi.first.units.Units.*;
+
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
@@ -12,6 +15,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -30,6 +35,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
@@ -50,6 +56,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final double kSimLoopPeriod = 0.005; // 5 ms for simulation loop
     private Notifier m_simNotifier = null; // Notifier for sim thread
     private double m_lastSimTime; // Track the last simulation time
+    // private double y;
 
     /* Define the operator's perspective based on alliance color */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero; // Blue alliance sees forward
@@ -68,6 +75,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private GenericEntry DS_PoseX = DS_Drive.add("PoseX", 0).getEntry();
     private GenericEntry DS_PoseY = DS_Drive.add("PoseY", 0).getEntry();
     private GenericEntry DS_PoseRot = DS_Drive.add("PoseRot", 0).getEntry();
+
+    PathConstraints bargeConstraints = new PathConstraints(
+            2, 2,
+            Units.degreesToRadians(540), Units.degreesToRadians(720));
 
     // PathPlanner configuration for autonomous driving
     RobotConfig config; // Holds PathPlanner robot configuration
@@ -143,7 +154,32 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread(); // Start simulation thread if in simulation mode
         }
         configureAutoBuilder(); // Configure PathPlanner's AutoBuilder for autonomous driving
+        // y = 0;
     }
+
+    public Command DrivetoPose(Pose2d targetPose, PathConstraints constraints) {
+
+        return AutoBuilder.pathfindToPose(
+                targetPose,
+                constraints,
+                0.0 // Goal end velocity in meters/sec
+
+        );
+
+    }
+
+    public Command BargeAid() {
+        PathConstraints constraints = this.bargeConstraints;
+        Pose2d targetPose = new Pose2d(8.1, 6, Rotation2d.fromDegrees(180));
+        return (DrivetoPose(targetPose, constraints));
+
+    }
+
+    // public Command SetY() {
+    // return runOnce(() -> {
+    // this.y = this.getState().Pose.getY();
+    // });
+    // }
 
     /**
      * Constructs a CTRE SwerveDrivetrain with the specified constants and odometry
@@ -313,121 +349,111 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         );
     }
 
-    // TODO Check out wills code for the following methods
-    /**
-     * Method to pid contorl drivetrain to a specific pose (x, y, theta)
-     * based of a vision target while also using joystick imput adjust the P
-     * Controlers Setpoint to allow for fine tune adjustments.
-     * 
-     * @param xAxis      (meters) x-axis of joystick for fine adjustment
-     * @param yAxis      (meters) y-axis of joystick for fine adjustment
-     * @param rotAxis    (radian) rotation axis of joystick for fine adjustment
-     * @param pose       (meters and radians) current visionpose of the robot in
-     *                   robot to target space
-     * @param targetPose (meters and radians) target visionpose of the robot in
-     *                   robot to target space
-     * @return output array of doubles range -1 to 1 to feed into a swerve request
-     *         fusing joystick control and P loop control
-     */
-    public double[] driveToPose(double xAxis, double yAxis, double rotAxis, Pose2d pose, Pose2d targetPose) {
-        double dx = targetPose.getX() - pose.getX() - xAxis * 0.5;// find the error in distance in meters for x and then
-                                                                  // add a joystick adjustment to the distance to fine
-                                                                  // adjust
-        double dy = targetPose.getY() - pose.getY() - yAxis * 0.5; // find the error in distance in meters for y and
-                                                                   // then add a joystick adjustment to the distance to
-                                                                   // fine adjust
-        double dtheta = targetPose.getRotation().getRadians() - pose.getRotation().getRadians() - rotAxis * 0.5; // find
-                                                                                                                 // the
-                                                                                                                 // error
-                                                                                                                 // in
-                                                                                                                 // angel
-                                                                                                                 // in
-                                                                                                                 // radians
-                                                                                                                 // for
-                                                                                                                 // theta
-                                                                                                                 // and
-                                                                                                                 // then
-                                                                                                                 // add
-                                                                                                                 // a
-                                                                                                                 // joystick
-                                                                                                                 // adjustment
-                                                                                                                 // to
-                                                                                                                 // the
-                                                                                                                 // angle
-                                                                                                                 // to
-                                                                                                                 // fine
-                                                                                                                 // adjust
+    // // TODO Check out wills code for the following methods
+    // /**
+    // * Method to pid contorl drivetrain to a specific pose (x, y, theta)
+    // * based of a vision target while also using joystick imput adjust the P
+    // * Controlers Setpoint to allow for fine tune adjustments.
+    // *
+    // * @param xAxis (meters) x-axis of joystick for fine adjustment
+    // * @param yAxis (meters) y-axis of joystick for fine adjustment
+    // * @param rotAxis (radian) rotation axis of joystick for fine adjustment
+    // * @param pose (meters and radians) current visionpose of the robot in
+    // * robot to target space
+    // * @param targetPose (meters and radians) target visionpose of the robot in
+    // * robot to target space
+    // * @return output array of doubles range -1 to 1 to feed into a swerve request
+    // * fusing joystick control and P loop control
+    // */
+    // public double[] driveToPose(double xAxis, double yAxis, double rotAxis,
+    // Pose2d pose, Pose2d targetPose) {
+    // double dx = targetPose.getX() - pose.getX() - xAxis * 0.5;// find the error
+    // in distance in meters for x and then
+    // // add a joystick adjustment to the distance to fine
+    // // adjust
+    // double dy = targetPose.getY() - pose.getY() - yAxis * 0.5; // find the error
+    // in distance in meters for y and
+    // // then add a joystick adjustment to the distance to
+    // // fine adjust
+    // double dtheta = targetPose.getRotation().getRadians() -
+    // pose.getRotation().getRadians() - rotAxis * 0.5; // find
 
-        // P control for x, y, and theta hard coded to allow for easier use
-        double xSpeed = dx * 0.1;
-        double ySpeed = dy * 0.1;
-        double thetaSpeed = dtheta * 0.1;
+    // // P control for x, y, and theta hard coded to allow for easier use
+    // double xSpeed = dx * 0.1;
+    // double ySpeed = dy * 0.1;
+    // double thetaSpeed = dtheta * 0.1;
 
-        // limit the speed of the robot to 0.2
-        if (Math.abs(xSpeed) > 0.2) {
-            xSpeed = xSpeed > 0 ? 0.2 : -0.2;
-        }
-        if (Math.abs(ySpeed) > 0.2) {
-            ySpeed = ySpeed > 0 ? 0.2 : -0.2;
-        }
-        if (Math.abs(thetaSpeed) > 0.2) {
-            thetaSpeed = thetaSpeed > 0 ? 0.2 : -0.2;
-        }
+    // // limit the speed of the robot to 0.2
+    // if (Math.abs(xSpeed) > 0.2) {
+    // xSpeed = xSpeed > 0 ? 0.2 : -0.2;
+    // }
+    // if (Math.abs(ySpeed) > 0.2) {
+    // ySpeed = ySpeed > 0 ? 0.2 : -0.2;
+    // }
+    // if (Math.abs(thetaSpeed) > 0.2) {
+    // thetaSpeed = thetaSpeed > 0 ? 0.2 : -0.2;
+    // }
 
-        double[] output = new double[] { xSpeed, ySpeed, thetaSpeed };
+    // double[] output = new double[] { xSpeed, ySpeed, thetaSpeed };
 
-        // return the speed of the robot in x, y, and theta
-        return output;
+    // // return the speed of the robot in x, y, and theta
+    // return output;
 
-    }
+    // }
 
-    /**
-     * Aligns the robot to a vision target based on the robot's current pose and the
-     * adjusted joystick values.
-     * 
-     * @param xAxis             x-axis of joystick for fine adjustment
-     * @param yAxis             y-axis of joystick for fine adjustment
-     * @param rotAxis           rotation axis of joystick for fine adjustment
-     * @param pose              current visionpose of the robot in robot to target
-     *                          space
-     * @param targetPose        target visionpose of the robot in robot to target
-     *                          space
-     * @param robotCentricDrive robot-centric drive mode for alignment
-     * @return
-     */
-    public SwerveRequest allignToTag(double xAxis, double yAxis, double rotAxis, Pose2d robotToTargetPose,
-            Pose2d targetBotToOffestPose, SwerveRequest.RobotCentric robotCentricDrive) {
-        double[] speeds = driveToPose(xAxis, yAxis, rotAxis, robotToTargetPose, targetBotToOffestPose);
+    // /**
+    // * Aligns the robot to a vision target based on the robot's current pose and
+    // the
+    // * adjusted joystick values.
+    // *
+    // * @param xAxis x-axis of joystick for fine adjustment
+    // * @param yAxis y-axis of joystick for fine adjustment
+    // * @param rotAxis rotation axis of joystick for fine adjustment
+    // * @param pose current visionpose of the robot in robot to target
+    // * space
+    // * @param targetPose target visionpose of the robot in robot to target
+    // * space
+    // * @param robotCentricDrive robot-centric drive mode for alignment
+    // * @return
+    // */
+    // public SwerveRequest allignToTag(double xAxis, double yAxis, double rotAxis,
+    // Pose2d robotToTargetPose,
+    // Pose2d targetBotToOffestPose, SwerveRequest.RobotCentric robotCentricDrive) {
+    // double[] speeds = driveToPose(xAxis, yAxis, rotAxis, robotToTargetPose,
+    // targetBotToOffestPose);
 
-        return robotCentricDrive
-                .withVelocityX(speeds[0])// Drive forward with negative Y (forward)
-                .withVelocityY(speeds[1]) // Drive left with negative X (left)
-                .withRotationalRate(speeds[2]);// Drive counterclockwise with negative X (left);
-    }
+    // return robotCentricDrive
+    // .withVelocityX(speeds[0])// Drive forward with negative Y (forward)
+    // .withVelocityY(speeds[1]) // Drive left with negative X (left)
+    // .withRotationalRate(speeds[2]);// Drive counterclockwise with negative X
+    // (left);
+    // }
 
-    /**
-     * Aligns the robot to the left of Tag 21 on the field vision target based on
-     * the robot's current pose and uses the joystick values to adjust the P
-     * setpoint to account for variation.
-     * 
-     * @param xAxis             x-axis of joystick for fine adjustment
-     * @param yAxis             y-axis of joystick for fine adjustment
-     * @param rotAxis           rotation axis of joystick for fine adjustment
-     * @param pose              current visionpose of the robot in robot to target
-     *                          space
-     * @param targetPose        target visionpose of the robot in robot to target
-     *                          space
-     * @param robotCentricDrive robot-centric drive mode for alignment
-     * @return
-     */
-    public SwerveRequest allignToTag21Left(double xAxis, double yAxis, double rotAxis,
-            SwerveRequest.FieldCentric fieldCentricCentricDrive) {
-        double[] speeds = driveToPose(xAxis, yAxis, rotAxis, getState().Pose,
-                new Pose2d(5.84, 3.845, new Rotation2d(174)));
+    // /**
+    // * Aligns the robot to the left of Tag 21 on the field vision target based on
+    // * the robot's current pose and uses the joystick values to adjust the P
+    // * setpoint to account for variation.
+    // *
+    // * @param xAxis x-axis of joystick for fine adjustment
+    // * @param yAxis y-axis of joystick for fine adjustment
+    // * @param rotAxis rotation axis of joystick for fine adjustment
+    // * @param pose current visionpose of the robot in robot to target
+    // * space
+    // * @param targetPose target visionpose of the robot in robot to target
+    // * space
+    // * @param robotCentricDrive robot-centric drive mode for alignment
+    // * @return
+    // */
+    // public SwerveRequest allignToTag21Left(double xAxis, double yAxis, double
+    // rotAxis,
+    // SwerveRequest.FieldCentric fieldCentricCentricDrive) {
+    // double[] speeds = driveToPose(xAxis, yAxis, rotAxis, getState().Pose,
+    // new Pose2d(5.84, 3.845, new Rotation2d(174)));
 
-        return fieldCentricCentricDrive
-                .withVelocityX(speeds[0])// Drive forward with negative Y (forward)
-                .withVelocityY(speeds[1]) // Drive left with negative X (left)
-                .withRotationalRate(speeds[2]);// Drive counterclockwise with negative X (left);
-    }
+    // return fieldCentricCentricDrive
+    // .withVelocityX(speeds[0])// Drive forward with negative Y (forward)
+    // .withVelocityY(speeds[1]) // Drive left with negative X (left)
+    // .withRotationalRate(speeds[2]);// Drive counterclockwise with negative X
+    // (left);
+    // }
 }
